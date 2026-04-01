@@ -1,0 +1,74 @@
+{
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass", "tailwind"],
+  "glassit.alpha": 255,
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 160,
+  "editor.fontFamily": "Fira Code",
+  "terminal.integrated.fontFamily": "\"Fira Code\"",
+  "editor.fontLigatures": true,
+  // "dart.lineLength": 160,
+  "html.format.wrapLineLength": 0,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Nord",
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[jso6fa19bn]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.inlineSuggest.enabled": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "debug.showBreakpointsInOverviewRuler": true,
+  "editor.rulers": [160],
+
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+"git.openRepositoryInParentFolders": "never",
+  "redhat.telemetry.enabled": true,
+  "window.zoomLevel": -1,
+  "editor.overviewRulerBorder": false,
+  "window.titleBarStyle": "custom",
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "hediet.vscode-drawio.resizeImages": null,
+  "debug.disassemblyView.showSourceCode": false,
+  "xml.format.maxLineWidth": 100,
+  "prisma.showPrismaDataPlatformNotification": false,
+
+  "catppuccin.bracketMode": "monochromatic",
+  "catppuccin.accentColor": "peach",
+  "catppuccin.italicComments": true,
+  "catppuccin.boldKeywords": true,
+  "catppuccin.colorOverrides": {
+    "mocha": {
+      "base": "#000000",
+      "mantle": "#010101",
+      "crust": "#020202"
+    },
+    "macchiato": {
+      "base": "#1e1e2e", //base
+      "mantle": "#181825", //sidebar
+      "crust": "#11111b" // title bar
+    }
+  },
+  "prettier.printWidth": 160,
+  "git.autofetch": true,
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "git.blame.editorDecoration.enabled": true,
+  "chat.viewSessions.orientation": "stacked",
+  "javascript.updateImportsOnFileMove.enabled": "always"
+}
