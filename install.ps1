@@ -1,6 +1,10 @@
 # install.ps1 – als Admin ausführen
 $dotfiles = "C:\Workspace\github\dotfiles-windows"
 
+# 1. Templates kompilieren
+Write-Host "Kompiliere Templates..."
+& "$dotfiles\build.ps1"
+
 function Link($source, $link) {
     if (Test-Path $link) {
         Write-Host "EXISTS (skip): $link"

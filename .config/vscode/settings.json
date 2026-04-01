@@ -3,13 +3,13 @@
   "glassit.alpha": 255,
   "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 160,
-  "editor.fontFamily": "Fira Code",
-  "terminal.integrated.fontFamily": "\"Fira Code\"",
+  "editor.fontFamily": "Iosevka NF",
+  "terminal.integrated.fontFamily": "\"Iosevka NF\"",
   "editor.fontLigatures": true,
   // "dart.lineLength": 160,
   "html.format.wrapLineLength": 0,
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.colorTheme": "Nord",
+  "workbench.colorTheme": "Catppuccin Mocha",
   "[javascript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
@@ -70,5 +70,68 @@
   "github.copilot.nextEditSuggestions.enabled": true,
   "git.blame.editorDecoration.enabled": true,
   "chat.viewSessions.orientation": "stacked",
-  "javascript.updateImportsOnFileMove.enabled": "always"
+  "javascript.updateImportsOnFileMove.enabled": "always",
+
+  // ── Vim ────────────────────────────────────────────────────────────────────
+  "vim.leader": "<Space>",
+  "vim.useSystemClipboard": true,
+  "vim.hlsearch": true,
+  "vim.incsearch": true,
+  "vim.ignorecase": true,
+  "vim.smartcase": true,
+  "vim.highlightedyank.enable": true,
+  "vim.handleKeys": {
+    "<C-a>": false,
+    "<C-f>": false,
+    "<C-h>": false,
+    "<C-z>": false,
+    "<C-x>": false,
+    "<C-v>": false,
+    "<C-w>": false
+  },
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // Datei
+    { "before": ["<Leader>", "w"],        "commands": ["workbench.action.files.save"] },
+    { "before": ["<Leader>", "q"],        "commands": ["workbench.action.closeActiveEditor"] },
+    // Explorer  (<Leader>e wie :Neotree toggle)
+    { "before": ["<Leader>", "e"],        "commands": ["workbench.action.toggleSidebarVisibility"] },
+    // Telescope-Äquivalente
+    { "before": ["<Leader>", "f", "f"],   "commands": ["workbench.action.quickOpen"] },
+    { "before": ["<Leader>", "f", "g"],   "commands": ["workbench.action.findInFiles"] },
+    { "before": ["<Leader>", "f", "b"],   "commands": ["workbench.action.showAllEditors"] },
+    { "before": ["<Leader>", "f", "h"],   "commands": ["workbench.action.showCommands"] },
+    // Buffer-Navigation (]b / [b)
+    { "before": ["]", "b"],               "commands": ["workbench.action.nextEditor"] },
+    { "before": ["[", "b"],               "commands": ["workbench.action.previousEditor"] },
+    { "before": ["<Leader>", "b", "d"],   "commands": ["workbench.action.closeActiveEditor"] },
+    // Splits (<Leader>sv / sh / se / sx)
+    { "before": ["<Leader>", "s", "v"],   "commands": ["workbench.action.splitEditorRight"] },
+    { "before": ["<Leader>", "s", "h"],   "commands": ["workbench.action.splitEditorDown"] },
+    { "before": ["<Leader>", "s", "e"],   "commands": ["workbench.action.evenEditorWidths"] },
+    { "before": ["<Leader>", "s", "x"],   "commands": ["workbench.action.closeActiveEditor"] },
+    // LSP (gD / gd / gr / gi)
+    { "before": ["g", "D"],               "commands": ["editor.action.revealDeclaration"] },
+    { "before": ["g", "d"],               "commands": ["editor.action.revealDefinition"] },
+    { "before": ["g", "r"],               "commands": ["editor.action.goToReferences"] },
+    { "before": ["g", "i"],               "commands": ["editor.action.goToImplementation"] },
+    { "before": ["g", "h"],               "commands": ["editor.action.showHover"] },
+    // Formatierung
+    { "before": ["<Leader>", "m", "p"],   "commands": ["editor.action.formatDocument"] },
+    // TypeScript
+    { "before": ["<Leader>", "t", "o"],   "commands": ["editor.action.organizeImports"] },
+    { "before": ["<Leader>", "t", "i"],   "commands": ["typescript.addMissingImports"] },
+    { "before": ["<Leader>", "t", "r"],   "commands": ["fileutils.renameFile"] },
+    // Terminal (<Leader>tt wie :ToggleTerm)
+    { "before": ["<Leader>", "t", "t"],   "commands": ["workbench.action.terminal.toggleTerminal"] },
+    // Copilot Chat (<Leader>cc)
+    { "before": ["<Leader>", "c", "c"],   "commands": ["workbench.panel.chat.view.copilot.focus"] },
+    { "before": ["<Leader>", "c", "x"],   "commands": ["workbench.action.chat.clear"] },
+    // console.log(<Leader>cl wie in nvim ftplugin)
+    { "before": ["<Leader>", "c", "l"],   "after": ["o", "c", "o", "n", "s", "o", "l", "e", ".", "l", "o", "g", "(", ")", ";", "<Esc>", "h", "i"] }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    { "before": ["<Leader>", "m", "p"],   "commands": ["editor.action.formatSelection"] },
+    // console.log(selection)
+    { "before": ["<Leader>", "c", "l"],   "after": ["c", "c", "o", "n", "s", "o", "l", "e", ".", "l", "o", "g", "(", "<C-r>", "\"", ")", ";", "<Esc>"] }
+  ]
 }

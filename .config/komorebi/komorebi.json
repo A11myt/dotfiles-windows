@@ -3,16 +3,16 @@
   "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
-  "default_workspace_padding": 20,
-  "default_container_padding": 20,
+  "default_workspace_padding": 5,
+  "default_container_padding": 2,
   "border": true,
-  "border_width": 8,
+  "border_width": 2,
   "border_offset": -1,
   "theme": {
     "palette": "Base16",
-    "name": "Ashes",
+    "name": "Gruvbox-Dark-Medium",
     "unfocused_border": "Base03",
-    "bar_accent": "Base0D"
+    "bar_accent": "Base09"
   },
   "monitors": [
     {
