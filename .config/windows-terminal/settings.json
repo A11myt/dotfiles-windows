@@ -1,4 +1,4 @@
-{
+﻿{
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
     "actions": [],
@@ -45,7 +45,7 @@
             "elevate": true,
             "font":
             {
-                "face": "Iosevka NF",
+                "face": "Hack Nerd Font",
                 "size": 10
             },
             "opacity": 90,
@@ -118,26 +118,26 @@
     [
         {
             "background":        "#1a110f",
-            "black":             "#181818",
-            "blue":              "#ffb5a0",
-            "brightBlack":       "#585B70",
-            "brightBlue":        "#89B4FA",
-            "brightCyan":        "#94E2D5",
-            "brightGreen":       "#A6E3A1",
-            "brightPurple":      "#F5C2E7",
-            "brightRed":         "#F38BA8",
-            "brightWhite":       "#A6ADC8",
-            "brightYellow":      "#F9E2AF",
-            "cursorColor":       "#d8c2bc",
-            "cyan":              "#e7bdb2",
-            "foreground":        "#f1dfda",
-            "green":             "#ffb5a0",
+            "black":             "#282c34",
+            "blue":              "#61afef",
+            "brightBlack":       "#5c6370",
+            "brightBlue":        "#61afef",
+            "brightCyan":        "#56b6c2",
+            "brightGreen":       "#98c379",
+            "brightPurple":      "#c678dd",
+            "brightRed":         "#e06c75",
+            "brightWhite":       "#ffffff",
+            "brightYellow":      "#e5c07b",
+            "cursorColor":       "#528bff",
+            "cyan":              "#56b6c2",
+            "foreground":        "#abb2bf",
+            "green":             "#98c379",
             "name":              "Matugen",
-            "purple":            "#d8c58d",
-            "red":               "#ffb4ab",
-            "selectionBackground": "#ffb5a0",
-            "white":             "#BAC2DE",
-            "yellow":            "#8f4c38"
+            "purple":            "#c678dd",
+            "red":               "#e06c75",
+            "selectionBackground": "#61afef",
+            "white":             "#abb2bf",
+            "yellow":            "#e5c07b"
         }
     ],
     "theme": "dark",

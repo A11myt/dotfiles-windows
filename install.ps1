@@ -33,6 +33,9 @@ Link ".config\vscode\keybindings.json"        "$env:APPDATA\Code\User\keybinding
 # Oh My Posh
 Link ".config\ohmyposh\theme.omp.json"        "$env:USERPROFILE\.config\ohmyposh\theme.omp.json"
 
+# PowerShell
+Link ".config\powershell\Microsoft.PowerShell_profile.ps1" $PROFILE
+
 # Windows Terminal
 Link ".config\windows-terminal\settings.json" `
     "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
@@ -40,9 +43,9 @@ Link ".config\windows-terminal\settings.json" `
 # 2. VSCode Extensions installieren
 if (Get-Command code -ErrorAction SilentlyContinue) {
     Write-Host "`nInstalliere VSCode Extensions..."
-    Get-Content "$dotfiles\.config\vscode\extensions.txt" | Where-Object { $_ -match '\S' } | ForEach-Object {
-        code --install-extension $_ --force
-    }
+    $extensions = Get-Content "$dotfiles\.config\vscode\extensions.txt" | Where-Object { $_ -match '\S' }
+    $args = $extensions | ForEach-Object { "--install-extension", $_ }
+    code @args --force
 } else {
     Write-Host "`nVSCode (code) nicht im PATH gefunden – Extensions uebersprungen."
 }
