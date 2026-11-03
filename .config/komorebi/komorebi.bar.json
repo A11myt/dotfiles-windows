@@ -9,11 +9,11 @@
     "horizontal": 4,
     "vertical": 2
   },
-  "widget_spacing": 6,
+  "widget_spacing": 8,
   "grouping": {
     "kind": "Widget",
     "style": "Default",
-    "rounding": 9,
+    "rounding": 14,
     "transparency_alpha": 235
   },
   "theme": {
@@ -23,10 +23,26 @@
   },
   "left_widgets": [
     {
+      "Time": {
+        "enable": true,
+        "format": "TwentyFourHourWithoutSeconds",
+        "label_prefix": "None"
+      }
+    },
+    {
+      "Date": {
+        "enable": true,
+        "format": {
+          "Custom": "%d.%m."
+        },
+        "label_prefix": "None"
+      }
+    },
+    {
       "Komorebi": {
         "workspaces": {
           "enable": true,
-          "hide_empty_workspaces": false,
+          "hide_empty_workspaces": true,
           "display": "AllIconsAndText"
         },
         "layout": {
@@ -68,23 +84,6 @@
     {
       "Battery": {
         "enable": true
-      }
-    },
-    {
-      "Systray": {
-        "enable": true
-      }
-    },
-    {
-      "Date": {
-        "enable": true,
-        "format": "DayDateMonthYear"
-      }
-    },
-    {
-      "Time": {
-        "enable": true,
-        "format": "TwentyFourHourWithoutSeconds"
       }
     }
   ],

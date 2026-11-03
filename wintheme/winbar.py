@@ -27,7 +27,7 @@ HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 BAR = HOME / "komorebi.bar.json"
 PRESET = HERE / "komorebi.bar.json"           # von install.ps1 neben winbar.py gelegt
 KOMOREBI = HOME / "komorebi.json"
-PRESET_VERSION = "2"      # erhöhen, wenn die Vorlage neu gestaltet wird → install.ps1 setzt sie einmal neu
+PRESET_VERSION = "3"      # erhöhen, wenn die Vorlage neu gestaltet wird → install.ps1 setzt sie einmal neu
 APPLIED = Path(os.environ.get("APPDATA", Path.home() / ".config")) / "wintheme" / "winbar-preset-applied"
 SIDES = {"left": "left_widgets", "center": "center_widgets", "right": "right_widgets",
          "links": "left_widgets", "mitte": "center_widgets", "rechts": "right_widgets"}
@@ -101,6 +101,23 @@ def save(d: dict) -> None:
     write(BAR, d)
     for i in range(1, bar_count()):
         write(bar_file(i), {**d, "monitor": i})
+
+
+def numbered_workspaces() -> None:
+    """Arbeitsflächen 1, 2, 3 … statt I, II, III (wie auf dem Laptop)."""
+    roman = {"I": "1", "II": "2", "III": "3", "IV": "4", "V": "5", "VI": "6", "VII": "7", "VIII": "8", "IX": "9", "X": "10"}
+    try:
+        k = json.loads(KOMOREBI.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return
+    changed = False
+    for m in k.get("monitors", []):
+        for w in m.get("workspaces", []):
+            if w.get("name") in roman:
+                w["name"] = roman[w["name"]]; changed = True
+    if changed:
+        with open(KOMOREBI, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(k, indent=2, ensure_ascii=False) + "\n")
 
 
 def screens() -> int:
@@ -237,6 +254,7 @@ def main(argv: list[str]) -> int:
         if BAR.is_file():
             preset["theme"] = load().get("theme", preset.get("theme"))   # Wallpaper-Farben behalten
         save(preset)
+        numbered_workspaces()
         APPLIED.parent.mkdir(parents=True, exist_ok=True)
         APPLIED.write_text(PRESET_VERSION)
         print("Leiste auf Laptop-Vorlage gesetzt")
