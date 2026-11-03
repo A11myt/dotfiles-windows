@@ -19,6 +19,8 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 | VS-Code-Erweiterungen | `code --install-extension` | aus `.config/vscode/extensions.txt` |
 | wintheme | eigene Python-Umgebung, Befehl `wintheme`, Rechtsklick-Menü, Autostart | `%LOCALAPPDATA%\wintheme` |
 
+**Nur installierte Werkzeuge werden eingerichtet** – fehlt z. B. komorebi oder whkd, wird es übersprungen
+(am Ende steht, was ausgelassen wurde; nach dem Nachinstallieren `install.ps1` einfach erneut ausführen).
 Fehlt Python, wird es per `winget` für deinen Benutzer installiert. Danach wird einmal mit dem aktuellen Wallpaper eingefärbt.
 
 ## wintheme – Farben aus dem Wallpaper
@@ -36,6 +38,7 @@ wintheme --dry-run                    # nur anzeigen
 Eingefärbt werden: **Windows** (Akzentpalette für Startmenü, Taskleiste, Fensterrahmen; Hell/Dunkel; Wallpaper),
 **Windows Terminal** (Schema „Matugen“), **VS Code** (markierter Block, Kommentare bleiben),
 **oh-my-posh** (aus `wintheme/templates/ohmyposh.json`) und **komorebi** (Fensterrahmen live über `komorebic`).
+Was nicht installiert ist, lässt wintheme aus.
 
 - **Rechtsklick auf ein Bild** → „Weitere Optionen anzeigen“ → „Als Hintergrund mit Farben (wintheme)“
 - **Automatisch:** `wintheme --watch` läuft im Autostart und färbt neu ein, wenn du das Wallpaper in den Windows-Einstellungen wechselst.

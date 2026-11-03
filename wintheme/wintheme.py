@@ -269,7 +269,7 @@ def terminal_scheme(c: dict) -> dict:
 def apply_terminal(pal: dict, dry: bool) -> str:
     files = terminal_settings()
     if not files:
-        return "Windows Terminal: nicht gefunden – übersprungen"
+        return None
     scheme = terminal_scheme(pal["colors"])
     for f in files:
         raw = f.read_text(encoding="utf-8-sig")
@@ -314,7 +314,7 @@ def render(template: str, colors: dict) -> str:
 def apply_vscode(pal: dict, dry: bool) -> str:
     files = vscode_settings()
     if not files:
-        return "VS Code: nicht gefunden – übersprungen"
+        return None
     colors = json.loads(render((HERE / "templates/vscode-colors.json").read_text(encoding="utf-8"), pal["colors"]))
     for f in files:
         text = f.read_text(encoding="utf-8-sig")
@@ -331,9 +331,10 @@ def apply_vscode(pal: dict, dry: bool) -> str:
 
 # ── oh-my-posh ───────────────────────────────────────────────────────────────
 def apply_ohmyposh(pal: dict, dry: bool) -> str:
+    import shutil
     tpl = HERE / "templates/ohmyposh.json"
-    if not tpl.is_file():
-        return "oh-my-posh: keine Vorlage – übersprungen"
+    if not tpl.is_file() or not shutil.which("oh-my-posh"):
+        return None
     if not dry:
         write_file(OHMYPOSH, render(tpl.read_text(encoding="utf-8"), pal["colors"]))
     return "oh-my-posh: Theme erzeugt (neue PowerShell-Fenster)" + (" (nur Vorschau)" if dry else "")
@@ -361,10 +362,13 @@ def set_borders(kinds: dict) -> bool:
 def apply_komorebi(pal: dict, dry: bool) -> str:
     c = pal["colors"]
     kinds = {"single": c["primary"], "stack": c["secondary"], "monocle": c["tertiary"], "unfocused": c["outline_variant"]}
+    import shutil
+    if not shutil.which("komorebic"):
+        return None
     if dry:
         return f"komorebi: Rahmen {c['primary']} (nur Vorschau)"
     if not set_borders(kinds):
-        return "komorebi: komorebic nicht gefunden oder Fehler – übersprungen"
+        return "komorebi: komorebic meldet einen Fehler (läuft komorebi?)"
     KOMOREBI_LAST.parent.mkdir(parents=True, exist_ok=True)
     KOMOREBI_LAST.write_text(json.dumps(kinds), encoding="utf-8")
     return f"komorebi: Rahmen {c['primary']}"
@@ -470,16 +474,22 @@ def run(image: Path, cfg: dict, set_wall: bool, only: set[str], dry: bool) -> No
     if not dry:
         remember(f"{image.name} · {cfg['scheme']} · {cfg['mode']}")
     print(f"{image.name}: Ausgangsfarbe {pal['source']} · {cfg['scheme']} · {'dunkel' if pal['dark'] else 'hell'}")
-    if "windows" in only:
-        print("  " + apply_windows(pal, image, set_wall, cfg["titlebars"], dry))
-    if "terminal" in only:
-        print("  " + apply_terminal(pal, dry))
-    if "vscode" in only:
-        print("  " + apply_vscode(pal, dry))
-    if "ohmyposh" in only:
-        print("  " + apply_ohmyposh(pal, dry))
-    if "komorebi" in only:
-        print("  " + apply_komorebi(pal, dry))
+    parts = [("windows", "Windows", lambda: apply_windows(pal, image, set_wall, cfg["titlebars"], dry)),
+             ("terminal", "Windows Terminal", lambda: apply_terminal(pal, dry)),
+             ("vscode", "VS Code", lambda: apply_vscode(pal, dry)),
+             ("ohmyposh", "oh-my-posh", lambda: apply_ohmyposh(pal, dry)),
+             ("komorebi", "komorebi", lambda: apply_komorebi(pal, dry))]
+    skipped = []
+    for key, name, fn in parts:
+        if key not in only:
+            continue
+        msg = fn()
+        if msg is None:              # Werkzeug nicht installiert → still überspringen, nur sammeln
+            skipped.append(name)
+        else:
+            print("  " + msg)
+    if skipped:
+        print("  übersprungen (nicht installiert): " + ", ".join(skipped))
 
 
 def watch(cfg_only: set[str]) -> None:

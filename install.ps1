@@ -7,6 +7,7 @@
   .\install.ps1 -Uninstall -KeepColors   wintheme entfernen, Farben behalten
   (Aufruf: powershell -ExecutionPolicy Bypass -File .\install.ps1)
 
+  Nur für installierte Werkzeuge – fehlende (z. B. komorebi, whkd) werden übersprungen.
   Hardlinks (Änderungen landen direkt im Repo): komorebi, whkd, PowerShell-Profil, VS-Code-Tastenkürzel.
   Einmal kopiert (wintheme trägt dort die Farben ein, das Repo bleibt sauber):
   Windows-Terminal- und VS-Code-settings.json. oh-my-posh-Theme wird von wintheme erzeugt.
@@ -61,17 +62,36 @@ function CopyOnce($source, $dest) {
     }
 }
 
-Link ".config\komorebi\komorebi.json"           "$env:USERPROFILE\komorebi.json"
-Link ".config\komorebi\komorebi.bar.json"       "$env:USERPROFILE\komorebi.bar.json"
-Link ".config\komorebi\applications.json"       "$env:USERPROFILE\applications.json"
-Link ".config\whkd\whkdrc"                     "$env:USERPROFILE\.config\whkdrc"
-Link ".config\vscode\keybindings.json"          "$env:APPDATA\Code\User\keybindings.json"
-Link ".config\powershell\Microsoft.PowerShell_profile.ps1" $PROFILE
-CopyOnce ".config\vscode\settings.json"         "$env:APPDATA\Code\User\settings.json"
-CopyOnce ".config\windows-terminal\settings.json" `
-    "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+# Welche Werkzeuge sind da? (fehlende werden übersprungen)
+function Has($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
+$wtDir  = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+$tools = [ordered]@{
+    'komorebi'         = (Has 'komorebic') -or (Has 'komorebi')
+    'whkd'             = Has 'whkd'
+    'VS Code'          = (Has 'code') -or (Test-Path "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe")
+    'Windows Terminal' = (Test-Path $wtDir) -or (Has 'wt')
+    'oh-my-posh'       = Has 'oh-my-posh'
+}
+$skipped = @($tools.Keys | Where-Object { -not $tools[$_] })
 
-if (Get-Command code -ErrorAction SilentlyContinue) {
+if ($tools['komorebi']) {
+    Link ".config\komorebi\komorebi.json"       "$env:USERPROFILE\komorebi.json"
+    Link ".config\komorebi\komorebi.bar.json"   "$env:USERPROFILE\komorebi.bar.json"
+    Link ".config\komorebi\applications.json"   "$env:USERPROFILE\applications.json"
+}
+if ($tools['whkd']) {
+    Link ".config\whkd\whkdrc"                 "$env:USERPROFILE\.config\whkdrc"
+}
+Link ".config\powershell\Microsoft.PowerShell_profile.ps1" $PROFILE   # prüft selbst, ob oh-my-posh da ist
+if ($tools['VS Code']) {
+    Link     ".config\vscode\keybindings.json"  "$env:APPDATA\Code\User\keybindings.json"
+    CopyOnce ".config\vscode\settings.json"     "$env:APPDATA\Code\User\settings.json"
+}
+if ($tools['Windows Terminal']) {
+    CopyOnce ".config\windows-terminal\settings.json" "$wtDir\LocalState\settings.json"
+}
+
+if (Has 'code') {
     Write-Host "`nVS-Code-Erweiterungen …"
     $exts = Get-Content (Join-Path $repo '.config\vscode\extensions.txt') | Where-Object { $_ -match '\S' }
     $codeArgs = $exts | ForEach-Object { '--install-extension', $_ }
@@ -136,4 +156,8 @@ if ($NoWatch) {
 
 Write-Host "`nEinmal mit dem aktuellen Wallpaper einfärben …"
 & $vpy $script
+if ($skipped.Count) {
+    Write-Host "`nÜbersprungen (nicht installiert): $($skipped -join ', ')"
+    Write-Host 'Später nachinstalliert? Einfach install.ps1 erneut ausführen.'
+}
 Write-Host "`nFertig. Neues PowerShell-Fenster öffnen (Prompt-Farben). Hilfe: wintheme --help"
