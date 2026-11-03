@@ -5,6 +5,7 @@
   .\install.ps1 -NoWatch        ohne Autostart von „wintheme --watch“
   .\install.ps1 -Uninstall      Originalfarben wiederherstellen und wintheme entfernen
   .\install.ps1 -Uninstall -KeepColors   wintheme entfernen, Farben behalten
+  .\install.ps1 -NoWinKeys      Windows-Kombis (Win+1–7, Q, C, F, D, O, W, Andocken) nicht für whkd freimachen
   (Aufruf: powershell -ExecutionPolicy Bypass -File .\install.ps1)
 
   Nur für installierte Werkzeuge – fehlende (z. B. komorebi, whkd) werden übersprungen.
@@ -13,7 +14,7 @@
   Einmal kopiert (wintheme trägt dort die Farben ein, das Repo bleibt sauber):
   Windows-Terminal- und VS-Code-settings.json. oh-my-posh-Theme wird von wintheme erzeugt.
 #>
-param([switch]$NoWatch, [switch]$Uninstall, [switch]$KeepColors)
+param([switch]$NoWatch, [switch]$Uninstall, [switch]$KeepColors, [switch]$NoWinKeys)
 $ErrorActionPreference = 'Stop'
 
 # Protokoll für diagnose.ps1 (auch bei Abbruch durch einen Fehler)
@@ -36,6 +37,10 @@ $MenuKey = 'HKCU:\Software\Classes\SystemFileAssociations\image\shell\wintheme'
 $Startup = Join-Path ([Environment]::GetFolderPath('Startup')) 'wintheme-watch.lnk'
 $vpy     = Join-Path $Dest 'venv\Scripts\python.exe'
 $vpyw    = Join-Path $Dest 'venv\Scripts\pythonw.exe'
+$AdvKey  = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+$DeskKey = 'HKCU:\Control Panel\Desktop'
+$KeysBak = Join-Path $env:APPDATA 'wintheme\winkeys-backup.json'   # Werte vor dem Freimachen
+$WinKeys = '1234567QCFDOW'                                         # Win+<Taste>, die whkd übernimmt
 
 function Stop-Watch {
     Get-Process pythonw -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$Dest*" } | Stop-Process -Force
@@ -47,6 +52,16 @@ if ($Uninstall) {
     if (-not $KeepColors -and (Test-Path $vpy)) {
         Write-Host 'Stelle den Zustand vor der ersten Benutzung wieder her …'
         & $vpy (Join-Path $Dest 'wintheme.py') --original
+    }
+    # Windows-Tastenkombis wie vorher
+    if (Test-Path $KeysBak) {
+        $b = Get-Content $KeysBak -Raw | ConvertFrom-Json
+        if ($null -ne $b.DisabledHotkeys) { Set-ItemProperty $AdvKey DisabledHotkeys $b.DisabledHotkeys }
+        else { Remove-ItemProperty $AdvKey -Name DisabledHotkeys -ErrorAction SilentlyContinue }
+        if ($null -ne $b.WindowArrangementActive) { Set-ItemProperty $DeskKey WindowArrangementActive $b.WindowArrangementActive }
+        Remove-Item $KeysBak -Force
+        Write-Host 'Windows-Tastenkombinationen wiederhergestellt – Explorer startet neu …'
+        Stop-Process -Name explorer -Force
     }
     Remove-Item -Recurse -Force $Dest, $OldShim, $Startup -ErrorAction SilentlyContinue
     $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -121,12 +136,35 @@ $tools = [ordered]@{
 $skipped = @($tools.Keys | Where-Object { -not $tools[$_] })
 
 if ($tools['komorebi']) {
-    Link ".config\komorebi\komorebi.json"       "$env:USERPROFILE\komorebi.json"
-    Link ".config\komorebi\komorebi.bar.json"   "$env:USERPROFILE\komorebi.bar.json"
+    # einmal kopieren: wintheme trägt dort das Farb-Theme ein (das Repo bleibt sauber)
+    CopyOnce ".config\komorebi\komorebi.json"     "$env:USERPROFILE\komorebi.json"
+    CopyOnce ".config\komorebi\komorebi.bar.json" "$env:USERPROFILE\komorebi.bar.json"
     Link ".config\komorebi\applications.json"   "$env:USERPROFILE\applications.json"
 }
 if ($tools['whkd']) {
     Link ".config\whkd\whkdrc"                 "$env:USERPROFILE\.config\whkdrc"
+    # Win-Kombis für whkd freimachen (offizieller Schalter „DisabledHotkeys“ + Andocken per Win+Pfeile aus)
+    if (-not $NoWinKeys) {
+        $cur  = (Get-ItemProperty $AdvKey -Name DisabledHotkeys -ErrorAction SilentlyContinue).DisabledHotkeys
+        $snap = (Get-ItemProperty $DeskKey -Name WindowArrangementActive -ErrorAction SilentlyContinue).WindowArrangementActive
+        if (-not (Test-Path $KeysBak)) {
+            New-Item -ItemType Directory -Force -Path (Split-Path $KeysBak) | Out-Null
+            @{ DisabledHotkeys = $cur; WindowArrangementActive = $snap } | ConvertTo-Json | Set-Content $KeysBak -Encoding UTF8
+        }
+        $merged = -join ((("$cur" + $WinKeys).ToCharArray()) | Select-Object -Unique)
+        if ($merged -ne "$cur" -or "$snap" -ne '0') {
+            Set-ItemProperty $AdvKey DisabledHotkeys $merged
+            Set-ItemProperty $DeskKey WindowArrangementActive '0'
+            Write-Host 'Win-Tastenkombinationen für whkd freigemacht – Explorer startet kurz neu …'
+            Stop-Process -Name explorer -Force      # Windows startet ihn automatisch wieder
+        }
+    }
+    # laufendes whkd mit neuer Belegung neu starten
+    if (Get-Process whkd -ErrorAction SilentlyContinue) {
+        Stop-Process -Name whkd -Force
+        Start-Process whkd -WindowStyle Hidden
+        Write-Host 'whkd mit neuer Belegung neu gestartet'
+    }
 }
 # Profil für BEIDE PowerShells: Windows PowerShell 5.1 und PowerShell 7 haben getrennte Profile
 # (install.ps1 läuft meist unter 5.1, im Terminal oft 7) – prüft selbst, ob oh-my-posh da ist
@@ -176,6 +214,8 @@ if (-not $py) {
 Write-Host "`nwintheme einrichten …"
 New-Item -ItemType Directory -Force -Path $Dest | Out-Null
 Copy-Item -Force (Join-Path $repo 'wintheme\wintheme.py') $Dest
+Copy-Item -Force (Join-Path $repo 'wintheme\winbar.py') $Dest
+Copy-Item -Force (Join-Path $repo '.config\komorebi\komorebi.bar.json') $Dest   # Vorlage für „winbar reset“
 Copy-Item -Force -Recurse (Join-Path $repo 'wintheme\templates') $Dest
 if (-not (Test-Path $vpy)) {
     $pyArgs = $py.Args
@@ -188,6 +228,7 @@ $script = Join-Path $Dest 'wintheme.py'
 # Befehl „wintheme“: eigener Ordner, dauerhaft im Benutzer-PATH (+ sofort in diesem Fenster)
 New-Item -ItemType Directory -Force -Path $Bin | Out-Null
 Set-Content -Encoding ASCII -Path $Shim -Value "@`"$vpy`" `"$script`" %*"
+Set-Content -Encoding ASCII -Path (Join-Path $Bin 'winbar.cmd') -Value "@`"$vpy`" `"$(Join-Path $Dest 'winbar.py')`" %*"
 Remove-Item -Force $OldShim -ErrorAction SilentlyContinue
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if (-not (($userPath -split ';') -contains $Bin)) {

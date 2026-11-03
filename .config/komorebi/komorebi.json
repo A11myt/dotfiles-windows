@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.json",
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
   "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
@@ -10,7 +10,7 @@
   "border_offset": -1,
   "theme": {
     "palette": "Base16",
-    "name": "Gruvbox-Dark-Medium",
+    "name": "GruvboxDarkMedium",
     "unfocused_border": "Base03",
     "bar_accent": "Base09"
   },
@@ -47,5 +47,12 @@
         }
       ]
     }
-  ]
+  ],
+  "border_style": "Rounded",
+  "animation": {
+    "enabled": true,
+    "duration": 200,
+    "style": "EaseOutCubic",
+    "fps": 60
+  }
 }

@@ -32,6 +32,7 @@ wintheme --mode light                 # hell/dunkel
 wintheme --sources                    # die 4 Ausgangsfarben des aktuellen Wallpapers
 wintheme --color 2                    # Ausgangsfarbe 2 für dieses Bild
 wintheme --titlebars on               # Akzentfarbe auch in Titelleisten
+wintheme --look off                   # nur Farben, Aussehen (Schrift, Abstände, Rahmen) nicht anfassen
 wintheme --dry-run                    # nur anzeigen
 ```
 
@@ -43,6 +44,31 @@ Was nicht installiert ist, lässt wintheme aus.
 - **Rechtsklick auf ein Bild** → „Weitere Optionen anzeigen“ → „Als Hintergrund mit Farben (wintheme)“
 - **Automatisch:** `wintheme --watch` läuft im Autostart und färbt neu ein, wenn du das Wallpaper in den Windows-Einstellungen wechselst.
 - Einstellungen merkt sich wintheme in `%APPDATA%\wintheme\config.json`.
+
+### Aussehen wie auf dem Laptop
+
+`wintheme` bringt außer den Farben auch das Aussehen mit (abschaltbar mit `--look off`):
+
+- **Windows Terminal** wie Alacritty: Iosevka NF 10, Innenabstand 18/20, 90 % Deckkraft mit Acryl, Strich-Cursor, keine Bildlaufleiste, Tab-Leiste in Wallpaper-Farben
+- **komorebi** wie Hyprland: Lücken 5 (außen) / 2 (zwischen Fenstern), runde Rahmen 2 px, weiche Animationen
+
+### Leiste anpassen – `winbar`
+
+Die komorebi-Leiste sieht aus wie auf dem Laptop (40 px, Arbeitsflächen mit Nummer + Icon, Fenstertitel in der Mitte, rechts Medien/CPU/RAM/Netz/Akku/Tray/Datum/Uhr). Änderungen wirken sofort:
+
+```powershell
+winbar                          # was ist wo
+winbar reset                    # Laptop-Vorlage (einmal nach dem Update ausführen)
+winbar add storage              # Widget einblenden (rechts) …
+winbar add tray left            # … oder auf eine Seite: left | center | right
+winbar remove cpu               # ausblenden
+winbar move time center 1       # verschieben (Position ab 1)
+winbar set height 36            # height · font "Iosevka NF" · size 12 · alpha 0–255 · round 10 · spacing 10 · groups on|off
+winbar workspaces both          # icons | text | both
+winbar taskbar hide             # Windows-Taskleiste automatisch ausblenden (show = zurück)
+```
+
+Widgets: workspaces, layout, window, media, cpu, memory, network, battery, storage, tray, date, time, keyboard, update.
 
 ### Rückgängig
 
@@ -72,6 +98,6 @@ und lädt den Bericht hoch (commit + push; `-NoPush` nur lokal). Benutzer- und R
 
 ## Tastenkürzel
 
+- **komorebi/whkd – wie Hyprland (Win = SUPER):** [docs/keybindings-windows.md](docs/keybindings-windows.md)
 - Windows Terminal (tmux-Ersatz): [docs/keybindings-terminal.md](docs/keybindings-terminal.md)
-- komorebi/whkd: direkt in [.config/whkd/whkdrc](.config/whkd/whkdrc)
 - VS Code (Vim-Plugin): [docs/keybindings-vscode.md](docs/keybindings-vscode.md)
