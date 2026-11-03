@@ -1,0 +1,115 @@
+﻿
+== System ==
+Zeit:       2026-11-03 10:33:49
+PowerShell: 5.1.26100.9711 (Desktop)
+Windows:    Microsoft Windows NT 10.0.26200.0
+Repo:       C:\Workspace\github\dotfiles-windows  (git 1ded219 Auswertung der Diagnose: komorebi-Fehler mitschreiben, Python-Suche, Kodierung)
+
+== Werkzeuge ==
+komorebic   Application: %USERPROFILE%\scoop\shims\komorebic.exe
+komorebi    Application: %USERPROFILE%\scoop\shims\komorebi.exe
+whkd        fehlt
+code        Application: C:\Program Files\Microsoft VS Code\bin\code.cmd
+oh-my-posh  Application: %USERPROFILE%\scoop\shims\oh-my-posh.exe
+wt          Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\wt.exe
+pwsh        Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe
+py          Application: %USERPROFILE%\scoop\apps\python\current\py.exe
+python      Application: %USERPROFILE%\scoop\apps\python\current\python.exe
+git         Application: C:\Program Files\Git\cmd\git.exe
+winget      Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\winget.exe
+wintheme    Application: %USERPROFILE%\AppData\Local\wintheme\bin\wintheme.cmd
+Terminal    ja
+
+== wintheme-Installation ==
+venv python:  ja
+wintheme.py:  ja
+Befehl (bin): ja
+alter Befehl: NEIN
+Autostart:    ja
+Rechtsklick:  ja
+--watch läuft: ja
+Python: Python 3.14.8
+Pakete: materialyoucolor==3.0.4, pillow==13.0.0
+
+== PATH (nur wintheme) ==
+Benutzer-PATH: %USERPROFILE%\AppData\Local\wintheme\bin
+dieses Fenster: %USERPROFILE%\AppData\Local\wintheme\bin
+
+== PowerShell-Profile ==
+WindowsPowerShell: fehlt
+PowerShell: vorhanden, LinkType=HardLink, wintheme-Funktion=ja
+aktuelles $PROFILE: %USERPROFILE%\OneDrive - <org>\Dokumente\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+
+== Einstellungen (config.json) ==
+keine
+gespeicherte Stände: 1, Original: ja
+
+== Probelauf (wintheme --dry-run) ==
+<bild>.png: Ausgangsfarbe #e35515 · tonal-spot · dunkel
+  Windows: Akzent #ac6449, dunkel (nur Vorschau)
+  Windows Terminal: Schema „Matugen“ (1 Datei) (nur Vorschau)
+  VS Code: Farben gesetzt (1×) (nur Vorschau)
+  oh-my-posh: Theme erzeugt (neue PowerShell-Fenster) (nur Vorschau)
+  komorebi: Rahmen #ffb59b (nur Vorschau)
+
+== wintheme.log (Ende) ==
+
+=== 2026-11-03 10:30:59 wintheme 
+<bild>.png: Ausgangsfarbe #e35515 Â· tonal-spot Â· dunkel
+  Windows: Akzent #ac6449, dunkel
+  Windows Terminal: Schema â€žMatugenâ€œ (1 Datei)
+  VS Code: Farben gesetzt (1Ã—)
+  oh-my-posh: Theme erzeugt (neue PowerShell-Fenster)
+
+=== 2026-11-03 10:31:02 wintheme --watch
+  komorebi: komorebic meldet einen Fehler (lÃ¤uft komorebi?)
+
+=== 2026-11-03 10:31:15 wintheme --dry-run
+<bild>.png: Ausgangsfarbe #e35515 Â· tonal-spot Â· dunkel
+  Windows: Akzent #ac6449, dunkel (nur Vorschau)
+  Windows Terminal: Schema â€žMatugenâ€œ (1 Datei) (nur Vorschau)
+  VS Code: Farben gesetzt (1Ã—) (nur Vorschau)
+  oh-my-posh: Theme erzeugt (neue PowerShell-Fenster) (nur Vorschau)
+  komorebi: Rahmen #ffb59b (nur Vorschau)
+
+=== 2026-11-03 10:33:52 wintheme --dry-run
+<bild>.png: Ausgangsfarbe #e35515 Â· tonal-spot Â· dunkel
+  Windows: Akzent #ac6449, dunkel (nur Vorschau)
+  Windows Terminal: Schema â€žMatugenâ€œ (1 Datei) (nur Vorschau)
+  VS Code: Farben gesetzt (1Ã—) (nur Vorschau)
+  oh-my-posh: Theme erzeugt (neue PowerShell-Fenster) (nur Vorschau)
+  komorebi: Rahmen #ffb59b (nur Vorschau)
+
+== install.log (Ende) ==
+**********************
+nStart der Windows PowerShell-Aufzeichnung
+Startzeit: 20261103103332
+Benutzername: AzureAD\<user>
+RunAs-Benutzer: AzureAD\<user>
+Konfigurationsname: 
+Computer: <pc> (Microsoft Windows NT 10.0.26200.0)
+Hostanwendung: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File .\install.ps1
+Prozess-ID: 38704
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+LINK:  %USERPROFILE%\komorebi.json
+LINK:  %USERPROFILE%\komorebi.bar.json
+LINK:  %USERPROFILE%\applications.json
+PS>TerminatingError(New-Item): "Der Cloudvorgang kann nicht für eine Datei mit inkompatiblen festen Links ausgeführt werden"
+>> TerminatingError(New-Item): "Der Cloudvorgang kann nicht für eine Datei mit inkompatiblen festen Links ausgeführt werden"
+FEHLER: Der Cloudvorgang kann nicht für eine Datei mit inkompatiblen festen Links ausgeführt werden
+  bei: In C:\Workspace\github\dotfiles-windows\install.ps1:67 Zeichen:5
++     New-Item -ItemType HardLink -Path $link -Target $target | Out-Nul ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Für Hilfe: powershell -ExecutionPolicy Bypass -File .\diagnose.ps1
+**********************
+Ende der Windows PowerShell-Aufzeichnung
+Endzeit: 20261103103332
+**********************
