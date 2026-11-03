@@ -8,7 +8,8 @@
   (Aufruf: powershell -ExecutionPolicy Bypass -File .\install.ps1)
 
   Nur für installierte Werkzeuge – fehlende (z. B. komorebi, whkd) werden übersprungen.
-  Hardlinks (Änderungen landen direkt im Repo): komorebi, whkd, PowerShell-Profil, VS-Code-Tastenkürzel.
+  Hardlinks (Änderungen landen direkt im Repo): komorebi, whkd, VS-Code-Tastenkürzel (geht ein Hardlink
+  nicht, z. B. in OneDrive, wird kopiert). PowerShell-Profil: kleine Ladedatei, die das Profil aus dem Repo lädt.
   Einmal kopiert (wintheme trägt dort die Farben ein, das Repo bleibt sauber):
   Windows-Terminal- und VS-Code-settings.json. oh-my-posh-Theme wird von wintheme erzeugt.
 #>
@@ -64,8 +65,33 @@ function Link($source, $link) {
     $target = Join-Path $repo $source
     New-Item -ItemType Directory -Force -Path (Split-Path $link) | Out-Null
     if (Test-Path $link) { Remove-Item $link -Force }
-    New-Item -ItemType HardLink -Path $link -Target $target | Out-Null
-    Write-Host "LINK:  $link"
+    try {
+        New-Item -ItemType HardLink -Path $link -Target $target -ErrorAction Stop | Out-Null
+        Write-Host "LINK:  $link"
+    } catch {
+        # z. B. OneDrive: keine Hardlinks erlaubt → Kopie statt Abbruch
+        Copy-Item $target $link -Force
+        Write-Host "KOPIE: $link (Hardlink nicht möglich: $($_.Exception.Message))" -ForegroundColor Yellow
+    }
+}
+# Profil: kleine Datei, die das Profil aus dem Repo lädt – funktioniert auch im OneDrive-Ordner
+function LinkProfile($dest) {
+    $src = Join-Path $repo '.config\powershell\Microsoft.PowerShell_profile.ps1'
+    $marker = '# dotfiles-windows: lädt das Profil aus dem Repo'
+    $stub = "$marker`r`n. '$src'`r`n"
+    New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+    if (Test-Path $dest) {
+        $old = Get-Content $dest -Raw -ErrorAction SilentlyContinue
+        $repoText = Get-Content $src -Raw
+        # eigene, fremde Profildatei sichern (nicht unser Lader, nicht die frühere Kopie/Link des Repo-Profils)
+        if ($old -and -not $old.StartsWith($marker) -and $old -ne $repoText) {
+            Copy-Item $dest "$dest.bak" -Force
+            Write-Host "SICHERUNG: $dest.bak"
+        }
+        Remove-Item $dest -Force
+    }
+    [System.IO.File]::WriteAllText($dest, $stub, (New-Object System.Text.UTF8Encoding $true))
+    Write-Host "PROFIL: $dest"
 }
 # Einmal kopieren: fehlt die Datei oder ist sie noch ein Hardlink aufs Repo (alte Installation) → Kopie;
 # eine eigene, unabhängige Datei bleibt unangetastet
@@ -106,7 +132,7 @@ if ($tools['whkd']) {
 # (install.ps1 läuft meist unter 5.1, im Terminal oft 7) – prüft selbst, ob oh-my-posh da ist
 $docs = [Environment]::GetFolderPath('MyDocuments')
 foreach ($dir in 'WindowsPowerShell', 'PowerShell') {
-    Link ".config\powershell\Microsoft.PowerShell_profile.ps1" (Join-Path $docs "$dir\Microsoft.PowerShell_profile.ps1")
+    LinkProfile (Join-Path $docs "$dir\Microsoft.PowerShell_profile.ps1")
 }
 if ($tools['VS Code']) {
     Link     ".config\vscode\keybindings.json"  "$env:APPDATA\Code\User\keybindings.json"

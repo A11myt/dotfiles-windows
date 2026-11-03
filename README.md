@@ -13,7 +13,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 |---|---|---|
 | komorebi, komorebi-bar, Apps | Hardlink | `%USERPROFILE%\komorebi*.json`, `applications.json` |
 | whkd | Hardlink | `%USERPROFILE%\.config\whkdrc` |
-| PowerShell-Profil | Hardlink | `$PROFILE` |
+| PowerShell-Profil | kleine Ladedatei (`. '<repo>\…\profile.ps1'`) – auch für OneDrive-Dokumente | Profile von Windows PowerShell **und** PowerShell 7 |
 | VS Code Tastenkürzel | Hardlink | `%APPDATA%\Code\User\keybindings.json` |
 | VS Code / Windows Terminal `settings.json` | **einmal kopiert** (wintheme schreibt dort die Farben hinein – das Repo bleibt sauber) | wie oben |
 | VS-Code-Erweiterungen | `code --install-extension` | aus `.config/vscode/extensions.txt` |
