@@ -51,7 +51,7 @@ HISTORY = APPDATA / "wintheme" / "history"          # Stände vor jedem Einfärb
 ORIGINAL = APPDATA / "wintheme" / "original.json"   # Stand vor der allerersten Benutzung (nie überschrieben)
 KEEP = 20
 LOGFILE = APPDATA / "wintheme" / "wintheme.log"       # für diagnose.ps1 (wird bei 200 KB gekürzt)
-DEFAULTS = {"mode": "dark", "scheme": "tonal-spot", "contrast": 0.0, "pick": {}, "titlebars": False, "look": True}
+DEFAULTS = {"mode": "dark", "scheme": "tonal-spot", "contrast": 0.0, "pick": {}, "override": {}, "titlebars": False, "look": True}
 # Aussehen wie auf dem Laptop (Alacritty/Hyprland); abschalten: config.json "look": false
 LOOK_FONT = "Iosevka NF"
 LOOK_TERMINAL = {"font": {"face": LOOK_FONT, "size": 10}, "padding": "18, 20", "opacity": 90, "useAcrylic": True,
@@ -329,16 +329,34 @@ def terminal_theme(c: dict, dark: bool) -> dict:
                     "showCloseButton": "hover"}}
 
 
-def terminal_scheme(c: dict) -> dict:
-    # wie die Alacritty-Vorlage auf dem Laptop
+ANSI_BASE = ["#e0544f", "#5fb95c", "#d8b23a", "#4f86d9", "#b65fc8", "#3fb4c2"]   # rot grün gelb blau magenta cyan
+
+
+def ansi(c: dict, source: str, dark: bool) -> tuple[list[str], list[str]]:
+    """16 Terminalfarben passend zum Theme – wie Theme Studio (src/lib/ansi.ts): klassische Farbtöne,
+    zur Ausgangsfarbe harmonisiert, Helligkeit nach hell/dunkel."""
+    from materialyoucolor.blend import Blend
+    from materialyoucolor.hct import Hct
+    src = 0xFF000000 | int(source[1:], 16)
+    def tone(h: str, t: float, max_chroma: float = 60) -> str:
+        x = Hct.from_int(Blend.harmonize(0xFF000000 | int(h[1:], 16), src))
+        return hexc(Hct.from_hct(x.hue, min(x.chroma, max_chroma), t).to_int())
+    n, b = (72, 82) if dark else (42, 32)
+    normal = [c["surface_container_highest"], *(tone(h, n) for h in ANSI_BASE), c["on_surface_variant"]]
+    bright = [c["outline"], *(tone(h, b, 48) for h in ANSI_BASE), c["on_surface"]]
+    return normal, bright
+
+
+def terminal_scheme(pal: dict) -> dict:
+    c = pal["colors"]
+    normal, bright = ansi(c, pal["source"], pal["dark"])
+    keys = ["black", "red", "green", "yellow", "blue", "purple", "cyan", "white"]
     return {
         "name": "Matugen",
         "background": c["background"], "foreground": c["on_surface"],
         "cursorColor": c["on_surface_variant"], "selectionBackground": c["primary"],
-        "black": "#181818", "red": c["error"], "green": c["primary"], "yellow": c["inverse_primary"],
-        "blue": c["primary"], "purple": c["tertiary"], "cyan": c["secondary"], "white": "#BAC2DE",
-        "brightBlack": "#585B70", "brightRed": "#F38BA8", "brightGreen": "#A6E3A1", "brightYellow": "#F9E2AF",
-        "brightBlue": "#89B4FA", "brightPurple": "#F5C2E7", "brightCyan": "#94E2D5", "brightWhite": "#A6ADC8",
+        **dict(zip(keys, normal)),
+        **{"bright" + k[0].upper() + k[1:]: v for k, v in zip(keys, bright)},
     }
 
 
@@ -346,7 +364,7 @@ def apply_terminal(pal: dict, dry: bool) -> str:
     files = terminal_settings()
     if not files:
         return None
-    scheme = terminal_scheme(pal["colors"])
+    scheme = terminal_scheme(pal)
     for f in files:
         raw = f.read_text(encoding="utf-8-sig")
         data = json.loads(strip_jsonc(raw))
@@ -585,6 +603,9 @@ def history() -> int:
 def run(image: Path, cfg: dict, set_wall: bool, only: set[str], dry: bool) -> None:
     pal = palette(image, cfg)
     pal["look"] = cfg.get("look", True)
+    # überschriebene Farben (z. B. aus Theme Studio) für dieses Bild
+    over = cfg.get("override", {}).get(image.name, {})
+    pal["colors"].update({k: v for k, v in over.items() if k in pal["colors"]})
     pal["font"] = cfg.get("font")
     if not dry:
         remember(f"{image.name} · {cfg['scheme']} · {cfg['mode']}")
@@ -634,6 +655,8 @@ def main() -> int:
     ap.add_argument("--contrast", type=float, help="-1 … 1")
     ap.add_argument("--titlebars", choices=["on", "off"], help="Akzentfarbe in Titelleisten")
     ap.add_argument("--look", choices=["on", "off"], help="Aussehen wie Linux (Terminal-Schrift/Abstand, Lücken, Rahmen)")
+    ap.add_argument("--override", action="append", metavar="ROLLE=#HEX",
+                    help="einzelne Farbe ersetzen, mehrfach möglich (gilt für dieses Bild; ohne = keine)")
     ap.add_argument("--font", help='Terminal-Schrift, z. B. "Iosevka Nerd Font Mono" (leer "" = Standard)')
     ap.add_argument("--only", default=PARTS)
     ap.add_argument("--sources", action="store_true")
@@ -682,8 +705,22 @@ def main() -> int:
             cfg["pick"].pop(image.name, None)
         elif re.fullmatch(r"#?[0-9a-fA-F]{6}", a.color):
             cfg["pick"][image.name] = "#" + a.color.lstrip("#").lower()
+            # Studio-Theme: Überschreibungen gehören dazu (ohne --override = keine)
+            over = {}
+            for o in a.override or []:
+                role, _, val = o.partition("=")
+                if not (re.fullmatch(r"[a-z_]+", role) and re.fullmatch(r"#[0-9a-fA-F]{6}", val)):
+                    print(f"--override erwartet rolle=#rrggbb, nicht {o}", file=sys.stderr)
+                    return 2
+                over[role] = val.lower()
+            cfg.setdefault("override", {})
+            if over:
+                cfg["override"][image.name] = over
+            else:
+                cfg["override"].pop(image.name, None)
         elif a.color.isdigit():
             cfg["pick"][image.name] = max(1, min(4, int(a.color))) - 1
+            cfg.get("override", {}).pop(image.name, None)
         else:
             print("--color: 1–4, auto oder eine Farbe wie #db79a9", file=sys.stderr)
             return 2
