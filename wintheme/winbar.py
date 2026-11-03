@@ -11,6 +11,7 @@
   winbar reset                   Laptop-Vorlage aus dem Repo (Farben bleiben)
   winbar init                    wie reset, aber nur beim allerersten Mal (für install.ps1)
   winbar taskbar hide|show       Windows-Taskleiste automatisch ausblenden / wieder zeigen
+  winbar monitors [anzahl|auto]  Leiste + Arbeitsflächen auf allen Bildschirmen (auto = erkennen)
 
 Widgets: workspaces, layout, window, media, cpu, memory, network, battery, storage,
          tray, date, time, keyboard, update
@@ -25,6 +26,7 @@ HERE = Path(__file__).resolve().parent
 HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 BAR = HOME / "komorebi.bar.json"
 PRESET = HERE / "komorebi.bar.json"           # von install.ps1 neben winbar.py gelegt
+KOMOREBI = HOME / "komorebi.json"
 APPLIED = Path(os.environ.get("APPDATA", Path.home() / ".config")) / "wintheme" / "winbar-preset-applied"
 SIDES = {"left": "left_widgets", "center": "center_widgets", "right": "right_widgets",
          "links": "left_widgets", "mitte": "center_widgets", "rechts": "right_widgets"}
@@ -75,10 +77,55 @@ def load() -> dict:
     return d
 
 
-def save(d: dict) -> None:
+def bar_file(i: int) -> Path:
+    return BAR if i == 0 else HOME / f"komorebi.bar.{i}.json"
+
+
+def write(f: Path, d: dict) -> None:
     # in-place schreiben: komorebi-bar beobachtet die Datei und lädt sofort neu
-    with open(BAR, "w", encoding="utf-8") as f:
-        f.write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+    with open(f, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+
+
+def bar_count() -> int:
+    try:
+        return max(1, len(json.loads(KOMOREBI.read_text(encoding="utf-8-sig")).get("bar_configurations") or [1]))
+    except (OSError, ValueError):
+        return 1
+
+
+def save(d: dict) -> None:
+    """Hauptleiste schreiben und auf die weiteren Bildschirme spiegeln (nur Bildschirm-Nummer anders)."""
+    d["monitor"] = 0
+    write(BAR, d)
+    for i in range(1, bar_count()):
+        write(bar_file(i), {**d, "monitor": i})
+
+
+def screens() -> int:
+    if sys.platform != "win32":
+        return 1
+    import ctypes
+    return max(1, ctypes.windll.user32.GetSystemMetrics(80))      # SM_CMONITORS
+
+
+def monitors(n: int) -> None:
+    if not KOMOREBI.is_file():
+        die(f"{KOMOREBI} fehlt")
+    k = json.loads(KOMOREBI.read_text(encoding="utf-8-sig"))
+    mons = k.setdefault("monitors", [])
+    template = mons[0] if mons else {"workspaces": [{"name": "I", "layout": "BSP"}]}
+    while len(mons) < n:                                   # weitere Bildschirme: gleiche Arbeitsflächen
+        mons.append(json.loads(json.dumps(template)))
+    k["bar_configurations"] = [("$Env:USERPROFILE/" + bar_file(i).name) for i in range(n)]
+    with open(KOMOREBI, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(k, indent=2, ensure_ascii=False) + "\n")
+    save(load())
+    for i in range(n, 8):                                  # überzählige Leisten-Dateien weg
+        if i and bar_file(i).exists():
+            bar_file(i).unlink()
+    print(f"{n} Bildschirm{'e' if n > 1 else ''}: Leiste und Arbeitsflächen auf jedem"
+          + (" – wirkt nach: komorebic stop --bar; komorebic start --bar --whkd" if n > 1 else ""))
 
 
 def widget(name: str) -> tuple[str, str | None, dict]:
@@ -169,6 +216,10 @@ def main(argv: list[str]) -> int:
     cmd, args = argv[0], argv[1:]
     if cmd in ("-h", "--help", "help"):
         print(__doc__.strip())
+        return 0
+    if cmd == "monitors":
+        arg = args[0] if args else "auto"
+        monitors(screens() if arg == "auto" else int(arg))
         return 0
     if cmd == "taskbar" and args and args[0] in ("hide", "show"):
         taskbar(args[0] == "hide")

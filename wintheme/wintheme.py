@@ -43,7 +43,9 @@ LOCALAPPDATA = Path(os.environ.get("LOCALAPPDATA", Path.home() / ".local/share")
 CONFIG = APPDATA / "wintheme" / "config.json"
 HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 OHMYPOSH = HOME / ".config/ohmyposh/theme.omp.json"          # vom PowerShell-Profil geladen
-KOMOREBI_FILES = [HOME / "komorebi.json", HOME / "komorebi.bar.json"]   # Theme „Custom“ wird hier eingetragen
+def komorebi_files() -> list[Path]:
+    """komorebi.json + Leisten aller Bildschirme (komorebi.bar.json, komorebi.bar.1.json …) – Theme „Custom“."""
+    return [HOME / "komorebi.json", HOME / "komorebi.bar.json", *sorted(HOME.glob("komorebi.bar.[0-9]*.json"))]
 PARTS = "windows,terminal,vscode,ohmyposh,komorebi"
 HISTORY = APPDATA / "wintheme" / "history"          # Stände vor jedem Einfärben (max. KEEP)
 ORIGINAL = APPDATA / "wintheme" / "original.json"   # Stand vor der allerersten Benutzung (nie überschrieben)
@@ -456,7 +458,7 @@ def base16(c: dict, dark: bool) -> dict:
 
 def apply_komorebi(pal: dict, dry: bool) -> str | None:
     import shutil
-    files = [f for f in KOMOREBI_FILES if f.is_file()]
+    files = [f for f in komorebi_files() if f.is_file()]
     if not shutil.which("komorebic") or not files:
         return None
     colours = base16(pal["colors"], pal["dark"])
@@ -468,7 +470,7 @@ def apply_komorebi(pal: dict, dry: bool) -> str | None:
     }
     for f in files:
         data = json.loads(strip_jsonc(f.read_text(encoding="utf-8-sig")))
-        data["theme"] = themes[f.name]
+        data["theme"] = themes["komorebi.json" if f.name == "komorebi.json" else "komorebi.bar.json"]
         if pal.get("look") and f.name == "komorebi.json":
             data.update(LOOK_KOMOREBI)
         if not dry:
@@ -503,7 +505,7 @@ def snapshot(label: str) -> dict:
                 snap["registry"].append({"path": path, "name": name, "kind": kind, "value": value})
         wp = reg_get(DESKTOP, "WallPaper")
         snap["wallpaper"] = wp[0] if wp else None
-    extra = [f for f in [OHMYPOSH, *KOMOREBI_FILES] if f.is_file()]
+    extra = [f for f in [OHMYPOSH, *komorebi_files()] if f.is_file()]
     for f in terminal_settings() + vscode_settings() + extra:
         snap["files"][str(f)] = f.read_text(encoding="utf-8-sig")
     return snap

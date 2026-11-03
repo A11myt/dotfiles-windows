@@ -255,7 +255,10 @@ if ($NoWatch) {
 }
 
 # Leiste: Laptop-Vorlage beim ersten Mal (später bleiben deine winbar-Änderungen)
-if ($tools['komorebi']) { & $vpy (Join-Path $Dest 'winbar.py') init }
+if ($tools['komorebi']) {
+    & $vpy (Join-Path $Dest 'winbar.py') init
+    & $vpy (Join-Path $Dest 'winbar.py') monitors auto      # Leiste + Arbeitsflächen auf jedem Bildschirm
+}
 
 Write-Host "`nEinmal mit dem aktuellen Wallpaper einfärben …"
 & $vpy $script
@@ -266,14 +269,15 @@ if ($tools['komorebi']) {
     if ($tools['whkd']) { $kArgs += '--whkd' }
     komorebic enable-autostart @kArgs *> $null
     if ($LASTEXITCODE -eq 0) { Write-Host "Autostart: komorebi $($kArgs -join ' ')" }
+    # (neu) starten, damit Leisten aller Bildschirme und neue Einstellungen sicher geladen sind
     komorebic state *> $null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host 'komorebi starten …'
-        komorebic start @kArgs
-    } else {
-        if (-not (Get-Process komorebi-bar -ErrorAction SilentlyContinue)) { Start-Process komorebi-bar -WindowStyle Hidden }
-        if ($tools['whkd'] -and -not (Get-Process whkd -ErrorAction SilentlyContinue)) { Start-Process whkd -WindowStyle Hidden }
-    }
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host 'komorebi neu starten …'
+        komorebic stop *> $null
+        Get-Process komorebi-bar, whkd -ErrorAction SilentlyContinue | Stop-Process -Force
+        Start-Sleep -Seconds 2
+    } else { Write-Host 'komorebi starten …' }
+    komorebic start @kArgs
 }
 if ($skipped.Count) {
     Write-Host "`nÜbersprungen (nicht installiert): $($skipped -join ', ')"
