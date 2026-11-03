@@ -6,7 +6,7 @@
   winbar remove <widget>         Widget ausblenden
   winbar move <widget> <seite> [pos]   Widget verschieben (pos ab 1, sonst ans Ende)
   winbar set <name> <wert>       height 40 · font "Iosevka NF" · size 12 · alpha 0–255 (Durchsicht)
-                                 · round 10 (Ecken) · spacing 10 · groups on|off
+                                 · round 9 (Ecken) · spacing 6 · groups pills|sides|bar|off
   winbar workspaces <art>        icons | text | both (Nummer + Icon, wie Laptop)
   winbar reset                   Laptop-Vorlage aus dem Repo (Farben bleiben)
   winbar init                    wie reset, aber nur beim allerersten Mal (für install.ps1)
@@ -27,6 +27,7 @@ HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 BAR = HOME / "komorebi.bar.json"
 PRESET = HERE / "komorebi.bar.json"           # von install.ps1 neben winbar.py gelegt
 KOMOREBI = HOME / "komorebi.json"
+PRESET_VERSION = "2"      # erhöhen, wenn die Vorlage neu gestaltet wird → install.ps1 setzt sie einmal neu
 APPLIED = Path(os.environ.get("APPDATA", Path.home() / ".config")) / "wintheme" / "winbar-preset-applied"
 SIDES = {"left": "left_widgets", "center": "center_widgets", "right": "right_widgets",
          "links": "left_widgets", "mitte": "center_widgets", "rechts": "right_widgets"}
@@ -188,7 +189,7 @@ def show(d: dict) -> None:
         print(f"  {label:7} {', '.join(names) or '–'}")
     g = d.get("grouping") or {}
     print(f"  Höhe {d.get('height', 50)} · Schrift {d.get('font_family', 'Standard')} {d.get('font_size', '')}"
-          f" · Durchsicht {d.get('transparency_alpha', 200)}/255 · Gruppen {'an' if g.get('kind', 'None') != 'None' else 'aus'}")
+          f" · Durchsicht {d.get('transparency_alpha', 200)}/255 · Gruppen { {'Widget': 'Pillen', 'Alignment': 'je Seite', 'Bar': 'ganze Leiste'}.get(g.get('kind'), 'aus') }")
     unused = [n for n, (t, p, _) in WIDGETS.items() if not is_on(d, t, p)]
     if unused:
         print(f"  verfügbar: {', '.join(unused)}")
@@ -225,7 +226,7 @@ def main(argv: list[str]) -> int:
         taskbar(args[0] == "hide")
         return 0
     if cmd == "init":
-        if APPLIED.exists():
+        if APPLIED.exists() and APPLIED.read_text().strip() == PRESET_VERSION:
             print("Leiste: deine Einstellungen bleiben (Vorlage wurde schon einmal gesetzt)")
             return 0
         cmd = "reset"
@@ -237,7 +238,7 @@ def main(argv: list[str]) -> int:
             preset["theme"] = load().get("theme", preset.get("theme"))   # Wallpaper-Farben behalten
         save(preset)
         APPLIED.parent.mkdir(parents=True, exist_ok=True)
-        APPLIED.write_text("1")
+        APPLIED.write_text(PRESET_VERSION)
         print("Leiste auf Laptop-Vorlage gesetzt")
         show(preset)
         return 0
@@ -288,9 +289,13 @@ def main(argv: list[str]) -> int:
                 d["widget_spacing"] = num(v)
             elif k == "round":
                 d.setdefault("grouping", {"kind": "Alignment", "style": "Default"})["rounding"] = num(v)
-            elif k == "groups":
-                d["grouping"] = ({"kind": "Alignment", "style": "Default", "rounding": 10, "transparency_alpha": 220}
-                                 if v == "on" else {"kind": "None"})
+            elif k == "groups":      # pills = jedes Widget einzeln, sides = je Seite ein Block, off = keine
+                kinds = {"pills": "Widget", "on": "Widget", "sides": "Alignment", "bar": "Bar", "off": "None"}
+                if v not in kinds:
+                    die("groups: pills | sides | bar | off")
+                g = d.get("grouping") or {}
+                d["grouping"] = {"kind": kinds[v], "style": "Default", "rounding": g.get("rounding", 9),
+                                 "transparency_alpha": g.get("transparency_alpha", 235)} if v != "off" else {"kind": "None"}
             else:
                 die("set: height | font | size | alpha | spacing | round | groups")
         except ValueError:

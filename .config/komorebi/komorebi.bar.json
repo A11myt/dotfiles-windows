@@ -1,20 +1,20 @@
 {
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.bar.json",
-  "height": 40,
+  "height": 34,
   "font_family": "Iosevka NF",
-  "font_size": 12,
-  "icon_scale": 1.3,
-  "transparency_alpha": 200,
+  "font_size": 11,
+  "icon_scale": 1.2,
+  "transparency_alpha": 0,
   "padding": {
-    "horizontal": 16,
-    "vertical": 4
+    "horizontal": 4,
+    "vertical": 2
   },
-  "widget_spacing": 10,
+  "widget_spacing": 6,
   "grouping": {
-    "kind": "Alignment",
+    "kind": "Widget",
     "style": "Default",
-    "rounding": 10,
-    "transparency_alpha": 220
+    "rounding": 9,
+    "transparency_alpha": 235
   },
   "theme": {
     "palette": "Base16",
@@ -48,11 +48,6 @@
     }
   ],
   "right_widgets": [
-    {
-      "Media": {
-        "enable": true
-      }
-    },
     {
       "Cpu": {
         "enable": true
@@ -92,5 +87,12 @@
         "format": "TwentyFourHourWithoutSeconds"
       }
     }
-  ]
+  ],
+  "margin": {
+    "horizontal": 6,
+    "vertical": [
+      4,
+      0
+    ]
+  }
 }

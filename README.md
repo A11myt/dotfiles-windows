@@ -65,7 +65,7 @@ winbar add storage              # Widget einblenden (rechts) …
 winbar add tray left            # … oder auf eine Seite: left | center | right
 winbar remove cpu               # ausblenden
 winbar move time center 1       # verschieben (Position ab 1)
-winbar set height 36            # height · font "Iosevka NF" · size 12 · alpha 0–255 · round 10 · spacing 10 · groups on|off
+winbar set height 36            # height · font "Iosevka NF" · size 12 · alpha 0–255 · round 9 · spacing 6 · groups pills|sides|bar|off
 winbar workspaces both          # icons | text | both
 winbar taskbar hide             # Windows-Taskleiste automatisch ausblenden (show = zurück)
 winbar monitors auto            # Leiste + Arbeitsflächen auf allen Bildschirmen (macht install.ps1 selbst)
