@@ -49,6 +49,13 @@ $watch = Get-Process pythonw -ErrorAction SilentlyContinue | Where-Object { $_.P
 Say "--watch läuft: $(Yes ([bool]$watch))"
 if (Test-Path $vpy) { Say "Python: $((& $vpy --version) 2>&1)"; Say "Pakete: $((& $vpy -m pip list --format=freeze 2>$null | Select-String 'materialyoucolor|pillow') -join ', ')" }
 
+Section 'komorebi'
+if (Get-Command komorebic -ErrorAction SilentlyContinue) {
+    komorebic state *> $null
+    Say "läuft: $(Yes ($LASTEXITCODE -eq 0))"
+    Say "Version: $((komorebic --version) 2>&1)"
+} else { Say 'nicht installiert' }
+
 Section 'PATH (nur wintheme)'
 Say "Benutzer-PATH: $(([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -like '*wintheme*' }) -join ' ; ')"
 Say "dieses Fenster: $(($env:Path -split ';' | Where-Object { $_ -like '*wintheme*' }) -join ' ; ')"
@@ -58,15 +65,19 @@ $docs = [Environment]::GetFolderPath('MyDocuments')
 foreach ($dir in 'WindowsPowerShell', 'PowerShell') {
     $p = Join-Path $docs "$dir\Microsoft.PowerShell_profile.ps1"
     if (Test-Path $p) {
-        $item = Get-Item $p
-        Say "$dir`: vorhanden, LinkType=$($item.LinkType), wintheme-Funktion=$(Yes ((Get-Content $p -Raw) -match 'function wintheme'))"
+        $txt = Get-Content $p -Raw -Encoding UTF8
+        $loader = $txt -match "^# dotfiles-windows: l"
+        # Ladedatei → das geladene Repo-Profil prüfen
+        $real = if ($loader -and $txt -match "\. '([^']+)'") { $Matches[1] } else { $p }
+        $hasFn = (Test-Path $real) -and ((Get-Content $real -Raw -Encoding UTF8) -match 'function wintheme')
+        Say "$dir`: $(if ($loader) { 'Ladedatei → Repo-Profil' } else { 'eigene Datei' }), wintheme-Funktion=$(Yes $hasFn)"
     } else { Say "$dir`: fehlt" }
 }
 Say "aktuelles `$PROFILE: $PROFILE"
 
 Section 'Einstellungen (config.json)'
 $cfg = Join-Path $env:APPDATA 'wintheme\config.json'
-if (Test-Path $cfg) { Get-Content $cfg | ForEach-Object { Say $_ } } else { Say 'keine' }
+if (Test-Path $cfg) { Get-Content $cfg -Encoding UTF8 | ForEach-Object { Say $_ } } else { Say 'keine' }
 $hist = Join-Path $env:APPDATA 'wintheme\history'
 Say "gespeicherte Stände: $(if (Test-Path $hist) { (Get-ChildItem $hist -Filter *.json).Count } else { 0 }), Original: $(Yes (Test-Path (Join-Path $env:APPDATA 'wintheme\original.json')))"
 
@@ -75,7 +86,7 @@ if (Test-Path $vpy) { (& $vpy $script --dry-run 2>&1) | ForEach-Object { Say "$_
 
 Section 'wintheme.log (Ende)'
 $wl = Join-Path $env:APPDATA 'wintheme\wintheme.log'
-if (Test-Path $wl) { Get-Content $wl -Tail 80 | ForEach-Object { Say $_ } } else { Say 'keins' }
+if (Test-Path $wl) { Get-Content $wl -Tail 80 -Encoding UTF8 | ForEach-Object { Say $_ } } else { Say 'keins' }
 
 Section 'install.log (Ende)'
 $il = Join-Path $env:LOCALAPPDATA 'wintheme-logs\install.log'
