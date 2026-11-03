@@ -72,6 +72,6 @@ und lädt den Bericht hoch (commit + push; `-NoPush` nur lokal). Benutzer- und R
 
 ## Tastenkürzel
 
+- **komorebi/whkd – wie Hyprland (Win = SUPER):** [docs/keybindings-windows.md](docs/keybindings-windows.md)
 - Windows Terminal (tmux-Ersatz): [docs/keybindings-terminal.md](docs/keybindings-terminal.md)
-- komorebi/whkd: direkt in [.config/whkd/whkdrc](.config/whkd/whkdrc)
 - VS Code (Vim-Plugin): [docs/keybindings-vscode.md](docs/keybindings-vscode.md)
