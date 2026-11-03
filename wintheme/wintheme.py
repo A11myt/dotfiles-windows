@@ -58,7 +58,7 @@ LOOK_TERMINAL = {"font": {"face": LOOK_FONT, "size": 10}, "padding": "18, 20", "
                  "cursorShape": "bar", "scrollbarState": "hidden", "intenseTextStyle": "bright"}
 LOOK_KOMOREBI = {"border": True, "border_style": "Rounded", "border_width": 2, "border_offset": -1,
                  "default_workspace_padding": 5, "default_container_padding": 2,
-                 "animation": {"enabled": True, "duration": 200, "style": "EaseOutCubic", "fps": 60}}
+                 "animation": {"enabled": False}}     # Animationen ruckeln/springen bei komorebi noch
 
 SCHEMES = {
     "tonal-spot": "scheme_tonal_spot.SchemeTonalSpot", "vibrant": "scheme_vibrant.SchemeVibrant",

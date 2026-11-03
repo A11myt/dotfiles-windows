@@ -50,9 +50,6 @@
   ],
   "border_style": "Rounded",
   "animation": {
-    "enabled": true,
-    "duration": 200,
-    "style": "EaseOutCubic",
-    "fps": 60
+    "enabled": false
   }
 }

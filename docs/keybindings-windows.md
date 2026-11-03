@@ -10,7 +10,8 @@ Win = SUPER. Quelle: `.config/whkd/whkdrc` (neu laden: Win+Alt+O).
 | Dateien | SUPER+E | Win+E (Windows selbst) |
 | Obsidian | SUPER+Strg+O | Win+Strg+O |
 | Fenster schließen | SUPER+C | Win+C |
-| Vollbild | SUPER+F | Win+F (Monokel) |
+| Vollbild | SUPER+F | Win+F (maximieren, bleibt stehen) |
+| Monokel (nur dieses Fenster gekachelt) | – | Win+Shift+F |
 | Schwebend/gekachelt | SUPER+V | **Win+Shift+Leertaste** (Win+V bleibt Zwischenablage) |
 | Teilung drehen | SUPER+O | Win+O |
 | Layout wechseln | SUPER+D | Win+D |

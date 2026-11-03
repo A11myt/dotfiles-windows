@@ -7,7 +7,8 @@
 
 # ── Fenster ──
 win + c                 : komorebic close
-win + f                 : komorebic toggle-monocle
+win + f                 : komorebic toggle-maximize
+win + shift + f         : komorebic toggle-monocle
 win + shift + space     : komorebic toggle-float
 win + o                 : komorebic flip-layout horizontal
 win + d                 : komorebic cycle-layout next

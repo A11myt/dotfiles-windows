@@ -50,7 +50,7 @@ Was nicht installiert ist, lässt wintheme aus.
 `wintheme` bringt außer den Farben auch das Aussehen mit (abschaltbar mit `--look off`):
 
 - **Windows Terminal** wie Alacritty: Iosevka NF 10, Innenabstand 18/20, 90 % Deckkraft mit Acryl, Strich-Cursor, keine Bildlaufleiste, Tab-Leiste in Wallpaper-Farben
-- **komorebi** wie Hyprland: Lücken 5 (außen) / 2 (zwischen Fenstern), runde Rahmen 2 px, weiche Animationen
+- **komorebi** wie Hyprland: Lücken 5 (außen) / 2 (zwischen Fenstern), runde Rahmen 2 px (Animationen aus – sie ruckeln bei komorebi noch)
 
 ### Leiste anpassen – `winbar`
 
