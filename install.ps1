@@ -125,16 +125,16 @@ if (Has 'code') {
 
 # ── 2. wintheme (Farben aus dem Wallpaper) ───────────────────────────────────
 function Find-Python {
-    # „py -3“ (Python-Launcher), sonst „python“ – nicht der Store-Platzhalter in WindowsApps
+    # „python“, sonst „py -3“ (Launcher) – nicht der Store-Platzhalter in WindowsApps
     $candidates = @(
-        [pscustomobject]@{ Name = 'py';     Args = [string[]]@('-3') },
-        [pscustomobject]@{ Name = 'python'; Args = [string[]]@() }
+        [pscustomobject]@{ Name = 'python'; Args = [string[]]@() },
+        [pscustomobject]@{ Name = 'py';     Args = [string[]]@('-3') }
     )
     foreach ($c in $candidates) {
         $exe = Get-Command $c.Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $exe -or $exe.Source -like '*\WindowsApps\python*') { continue }
         $pyArgs = $c.Args
-        $ok = & $exe.Source @pyArgs -c 'import sys; print(sys.version_info >= (3, 10))' 2>$null
+        $ok = & $exe.Source @pyArgs -c 'import sys; print(sys.version_info >= (3, 10))' 2>$null | Select-Object -Last 1
         if ($ok -eq 'True') { return [pscustomobject]@{ Exe = $exe.Source; Args = $pyArgs } }
     }
     return $null

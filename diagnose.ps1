@@ -5,7 +5,7 @@
   .\diagnose.ps1 -NoPush    nur schreiben
   (Aufruf: powershell -ExecutionPolicy Bypass -File .\diagnose.ps1)
 
-  Datenschutz: Benutzer- und Rechnername werden ersetzt (<user>, <pc>), Pfade unter dem
+  Datenschutz: Benutzer-, Rechner-, OneDrive-Firmen- und Wallpaper-Name werden ersetzt, Pfade unter dem
   Benutzerordner als %USERPROFILE%. Keine Umgebungsvariablen außer wintheme-Einträgen im PATH.
 #>
 param([switch]$NoPush)
@@ -18,6 +18,9 @@ $Dest   = Join-Path $env:LOCALAPPDATA 'wintheme'
 $vpy    = Join-Path $Dest 'venv\Scripts\python.exe'
 $script = Join-Path $Dest 'wintheme.py'
 $out    = New-Object System.Collections.Generic.List[string]
+# Python-Ausgaben als UTF-8 lesen (sonst „À“ statt „·“)
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = 'utf-8'
 function Say([string]$t) { $out.Add($t) }
 function Section([string]$t) { Say ''; Say "== $t ==" }
 function Yes([bool]$b) { if ($b) { 'ja' } else { 'NEIN' } }
@@ -83,6 +86,8 @@ $text = $out -join "`r`n"
 $text = $text.Replace($env:USERPROFILE, '%USERPROFILE%')
 if ($env:USERNAME)     { $text = $text -replace [regex]::Escape($env:USERNAME), '<user>' }
 if ($env:COMPUTERNAME) { $text = $text -replace [regex]::Escape($env:COMPUTERNAME), '<pc>' }
+$text = $text -replace 'OneDrive - [^\\/\r\n]+', 'OneDrive - <org>'               # Firmenname im OneDrive-Ordner
+$text = $text -replace '(?m)^(\S[^\r\n]*?)\.(png|jpe?g|webp|bmp): Ausgangsfarbe', '<bild>.$2: Ausgangsfarbe'   # Wallpaper-Name
 New-Item -ItemType Directory -Force -Path $logs | Out-Null
 [System.IO.File]::WriteAllText($file, $text, (New-Object System.Text.UTF8Encoding $true))
 Write-Host "Bericht: $file"

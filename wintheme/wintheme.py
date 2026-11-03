@@ -373,14 +373,22 @@ def apply_ohmyposh(pal: dict, dry: bool) -> str:
 
 
 # ── komorebi (Fensterrahmen, live) ───────────────────────────────────────────
+KOMOREBI_ERR = ""      # letzte Fehlermeldung von komorebic (fürs Protokoll)
+
+
 def komorebic(*args: str) -> bool:
+    global KOMOREBI_ERR
     import shutil
     import subprocess
     exe = shutil.which("komorebic")
     if not exe:
         return False
     flags = 0x08000000 if IS_WIN else 0                    # CREATE_NO_WINDOW: kein aufblitzendes Fenster
-    return subprocess.run([exe, *args], capture_output=True, creationflags=flags).returncode == 0
+    r = subprocess.run([exe, *args], capture_output=True, text=True, errors="replace", creationflags=flags)
+    if r.returncode != 0:
+        KOMOREBI_ERR = f"komorebic {' '.join(args)} → Code {r.returncode}: " + " | ".join(
+            l.strip() for l in (r.stderr + r.stdout).splitlines() if l.strip())[:500]
+    return r.returncode == 0
 
 
 def set_borders(kinds: dict) -> bool:
@@ -399,8 +407,11 @@ def apply_komorebi(pal: dict, dry: bool) -> str:
         return None
     if dry:
         return f"komorebi: Rahmen {c['primary']} (nur Vorschau)"
+    if not komorebic("state"):
+        return "komorebi: läuft gerade nicht – Rahmenfarben beim nächsten Einfärben"
     if not set_borders(kinds):
-        return "komorebi: komorebic meldet einen Fehler (läuft komorebi?)"
+        log_raw(KOMOREBI_ERR + "\n")
+        return "komorebi: Fehler beim Setzen der Rahmenfarben – Details in wintheme.log"
     KOMOREBI_LAST.parent.mkdir(parents=True, exist_ok=True)
     KOMOREBI_LAST.write_text(json.dumps(kinds), encoding="utf-8")
     return f"komorebi: Rahmen {c['primary']}"
