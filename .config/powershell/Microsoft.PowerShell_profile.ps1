@@ -8,6 +8,7 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
 $wintheme = "$env:LOCALAPPDATA\wintheme"
 if (Test-Path "$wintheme\venv\Scripts\python.exe") {
     function wintheme { & "$wintheme\venv\Scripts\python.exe" "$wintheme\wintheme.py" @args }
+    function winbar   { & "$wintheme\venv\Scripts\python.exe" "$wintheme\winbar.py" @args }
 }
 
 # ── PSReadLine ────────────────────────────────────────────────────────────────

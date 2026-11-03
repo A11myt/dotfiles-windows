@@ -49,7 +49,14 @@ HISTORY = APPDATA / "wintheme" / "history"          # Stände vor jedem Einfärb
 ORIGINAL = APPDATA / "wintheme" / "original.json"   # Stand vor der allerersten Benutzung (nie überschrieben)
 KEEP = 20
 LOGFILE = APPDATA / "wintheme" / "wintheme.log"       # für diagnose.ps1 (wird bei 200 KB gekürzt)
-DEFAULTS = {"mode": "dark", "scheme": "tonal-spot", "contrast": 0.0, "pick": {}, "titlebars": False}
+DEFAULTS = {"mode": "dark", "scheme": "tonal-spot", "contrast": 0.0, "pick": {}, "titlebars": False, "look": True}
+# Aussehen wie auf dem Laptop (Alacritty/Hyprland); abschalten: config.json "look": false
+LOOK_FONT = "Iosevka NF"
+LOOK_TERMINAL = {"font": {"face": LOOK_FONT, "size": 10}, "padding": "18, 20", "opacity": 90, "useAcrylic": True,
+                 "cursorShape": "bar", "scrollbarState": "hidden", "intenseTextStyle": "bright"}
+LOOK_KOMOREBI = {"border": True, "border_style": "Rounded", "border_width": 2, "border_offset": -1,
+                 "default_workspace_padding": 5, "default_container_padding": 2,
+                 "animation": {"enabled": True, "duration": 200, "style": "EaseOutCubic", "fps": 60}}
 
 SCHEMES = {
     "tonal-spot": "scheme_tonal_spot.SchemeTonalSpot", "vibrant": "scheme_vibrant.SchemeVibrant",
@@ -285,6 +292,38 @@ def terminal_settings() -> list[Path]:
     return [p for p in cands if p.is_file()]
 
 
+def font_installed(name: str) -> bool:
+    """Schrift in der Registry (systemweit oder nur für den Benutzer) vorhanden?"""
+    if not IS_WIN:
+        return True
+    import winreg
+    key = r"Software\Microsoft\Windows NT\CurrentVersion\Fonts"
+    want = name.lower().replace(" ", "")
+    for root in (winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER):
+        try:
+            with winreg.OpenKey(root, key) as k:
+                i = 0
+                while True:
+                    try:
+                        if want in winreg.EnumValue(k, i)[0].lower().replace(" ", ""):
+                            return True
+                    except OSError:
+                        break
+                    i += 1
+        except OSError:
+            pass
+    return False
+
+
+def terminal_theme(c: dict, dark: bool) -> dict:
+    """Fensterrahmen/Tabs von Windows Terminal in den Wallpaper-Farben."""
+    return {"name": "Matugen",
+            "window": {"applicationTheme": "dark" if dark else "light", "useMica": False},
+            "tabRow": {"background": c["surface"] + "ff", "unfocusedBackground": c["surface"] + "ff"},
+            "tab": {"background": c["surface_container_high"] + "ff", "unfocusedBackground": c["surface"] + "ff",
+                    "showCloseButton": "hover"}}
+
+
 def terminal_scheme(c: dict) -> dict:
     # wie die Alacritty-Vorlage auf dem Laptop
     return {
@@ -310,14 +349,27 @@ def apply_terminal(pal: dict, dry: bool) -> str:
         data.setdefault("profiles", {})
         if isinstance(data["profiles"], list):           # sehr alte Form
             data["profiles"] = {"list": data["profiles"]}
-        data["profiles"].setdefault("defaults", {})["colorScheme"] = "Matugen"
+        defaults = data["profiles"].setdefault("defaults", {})
+        defaults["colorScheme"] = "Matugen"
+        if pal.get("look"):
+            look = dict(LOOK_TERMINAL)
+            if not font_installed(LOOK_FONT):
+                look.pop("font")
+            defaults.update(look)
+            data["themes"] = [t for t in data.get("themes", []) if t.get("name") != "Matugen"] + [
+                terminal_theme(pal["colors"], pal["dark"])]
+            data["theme"] = "Matugen"
+            data["useAcrylicInTabRow"] = True
         if dry:
             continue
         backup = f.with_name(f.name + ".wintheme-backup")
         if not backup.exists():
             backup.write_text(raw, encoding="utf-8")
         write_file(f, json.dumps(data, indent=4, ensure_ascii=False))   # Terminal lädt Änderungen sofort
-    return f"Windows Terminal: Schema „Matugen“ ({len(files)} Datei{'en' if len(files) > 1 else ''})" + (" (nur Vorschau)" if dry else "")
+    extra = ""
+    if pal.get("look"):
+        extra = ", Aussehen wie Alacritty" + ("" if font_installed(LOOK_FONT) else f" (Schrift „{LOOK_FONT}“ fehlt: scoop bucket add nerd-fonts; scoop install Iosevka-NF)")
+    return f"Windows Terminal: Schema „Matugen“{extra} ({len(files)} Datei{'en' if len(files) > 1 else ''})" + (" (nur Vorschau)" if dry else "")
 
 
 # ── VS Code ──────────────────────────────────────────────────────────────────
@@ -417,6 +469,8 @@ def apply_komorebi(pal: dict, dry: bool) -> str | None:
     for f in files:
         data = json.loads(strip_jsonc(f.read_text(encoding="utf-8-sig")))
         data["theme"] = themes[f.name]
+        if pal.get("look") and f.name == "komorebi.json":
+            data.update(LOOK_KOMOREBI)
         if not dry:
             write_file(f, json.dumps(data, indent=2, ensure_ascii=False))
     if dry:
@@ -522,6 +576,7 @@ def history() -> int:
 # ── Ablauf ───────────────────────────────────────────────────────────────────
 def run(image: Path, cfg: dict, set_wall: bool, only: set[str], dry: bool) -> None:
     pal = palette(image, cfg)
+    pal["look"] = cfg.get("look", True)
     if not dry:
         remember(f"{image.name} · {cfg['scheme']} · {cfg['mode']}")
     print(f"{image.name}: Ausgangsfarbe {pal['source']} · {cfg['scheme']} · {'dunkel' if pal['dark'] else 'hell'}")
@@ -569,6 +624,7 @@ def main() -> int:
     ap.add_argument("--color", help="1–4 oder auto (Ausgangsfarbe für dieses Bild)")
     ap.add_argument("--contrast", type=float, help="-1 … 1")
     ap.add_argument("--titlebars", choices=["on", "off"], help="Akzentfarbe in Titelleisten")
+    ap.add_argument("--look", choices=["on", "off"], help="Aussehen wie Linux (Terminal-Schrift/Abstand, Lücken, Rahmen)")
     ap.add_argument("--only", default=PARTS)
     ap.add_argument("--sources", action="store_true")
     ap.add_argument("--watch", action="store_true")
@@ -591,6 +647,8 @@ def main() -> int:
             cfg[k] = getattr(a, k); changed = True
     if a.titlebars:
         cfg["titlebars"] = a.titlebars == "on"; changed = True
+    if a.look:
+        cfg["look"] = a.look == "on"; changed = True
     only = {x.strip() for x in a.only.split(",") if x.strip()}
 
     if a.watch:

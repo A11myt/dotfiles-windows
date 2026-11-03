@@ -1,54 +1,83 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.bar.json",
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.bar.json",
+  "height": 40,
   "font_family": "Iosevka NF",
+  "font_size": 12,
+  "icon_scale": 1.3,
+  "transparency_alpha": 200,
+  "padding": {
+    "horizontal": 16,
+    "vertical": 4
+  },
+  "widget_spacing": 10,
+  "grouping": {
+    "kind": "Alignment",
+    "style": "Default",
+    "rounding": 10,
+    "transparency_alpha": 220
+  },
   "theme": {
     "palette": "Base16",
     "name": "GruvboxDarkMedium",
-    "accent": "Base09"
+    "accent": "Base0D"
   },
   "left_widgets": [
     {
       "Komorebi": {
         "workspaces": {
           "enable": true,
-          "hide_empty_workspaces": false
+          "hide_empty_workspaces": false,
+          "display": "AllIconsAndText"
         },
         "layout": {
-          "enable": true
-        },
-        "focused_window": {
           "enable": true,
-          "show_icon": true
+          "display": "Icon"
+        }
+      }
+    }
+  ],
+  "center_widgets": [
+    {
+      "Komorebi": {
+        "focused_container": {
+          "enable": true,
+          "show_icon": true,
+          "display": "IconAndText"
         }
       }
     }
   ],
   "right_widgets": [
     {
-      "Update": {
+      "Media": {
         "enable": true
       }
     },
     {
-      "Media": {
-        "enable": false
-      }
-    },
-    {
-      "Storage": {
-        "enable": false
+      "Cpu": {
+        "enable": true
       }
     },
     {
       "Memory": {
-        "enable": false
+        "enable": true
       }
     },
     {
       "Network": {
-        "enable": false,
-        "show_activity": true,
-        "show_total_activity": true
+        "enable": true,
+        "show_activity": false,
+        "show_total_activity": false
+      }
+    },
+    {
+      "Battery": {
+        "enable": true
+      }
+    },
+    {
+      "Systray": {
+        "enable": true
       }
     },
     {
@@ -60,12 +89,7 @@
     {
       "Time": {
         "enable": true,
-        "format": "TwentyFourHour"
-      }
-    },
-    {
-      "Battery": {
-        "enable": true
+        "format": "TwentyFourHourWithoutSeconds"
       }
     }
   ]

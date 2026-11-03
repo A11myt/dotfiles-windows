@@ -214,6 +214,8 @@ if (-not $py) {
 Write-Host "`nwintheme einrichten …"
 New-Item -ItemType Directory -Force -Path $Dest | Out-Null
 Copy-Item -Force (Join-Path $repo 'wintheme\wintheme.py') $Dest
+Copy-Item -Force (Join-Path $repo 'wintheme\winbar.py') $Dest
+Copy-Item -Force (Join-Path $repo '.config\komorebi\komorebi.bar.json') $Dest   # Vorlage für „winbar reset“
 Copy-Item -Force -Recurse (Join-Path $repo 'wintheme\templates') $Dest
 if (-not (Test-Path $vpy)) {
     $pyArgs = $py.Args
@@ -226,6 +228,7 @@ $script = Join-Path $Dest 'wintheme.py'
 # Befehl „wintheme“: eigener Ordner, dauerhaft im Benutzer-PATH (+ sofort in diesem Fenster)
 New-Item -ItemType Directory -Force -Path $Bin | Out-Null
 Set-Content -Encoding ASCII -Path $Shim -Value "@`"$vpy`" `"$script`" %*"
+Set-Content -Encoding ASCII -Path (Join-Path $Bin 'winbar.cmd') -Value "@`"$vpy`" `"$(Join-Path $Dest 'winbar.py')`" %*"
 Remove-Item -Force $OldShim -ErrorAction SilentlyContinue
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if (-not (($userPath -split ';') -contains $Bin)) {
