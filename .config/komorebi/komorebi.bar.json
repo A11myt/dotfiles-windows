@@ -3,7 +3,7 @@
   "font_family": "Iosevka NF",
   "theme": {
     "palette": "Base16",
-    "name": "Gruvbox-Dark-Medium",
+    "name": "GruvboxDarkMedium",
     "accent": "Base09"
   },
   "left_widgets": [

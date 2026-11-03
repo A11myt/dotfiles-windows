@@ -121,8 +121,9 @@ $tools = [ordered]@{
 $skipped = @($tools.Keys | Where-Object { -not $tools[$_] })
 
 if ($tools['komorebi']) {
-    Link ".config\komorebi\komorebi.json"       "$env:USERPROFILE\komorebi.json"
-    Link ".config\komorebi\komorebi.bar.json"   "$env:USERPROFILE\komorebi.bar.json"
+    # einmal kopieren: wintheme trägt dort das Farb-Theme ein (das Repo bleibt sauber)
+    CopyOnce ".config\komorebi\komorebi.json"     "$env:USERPROFILE\komorebi.json"
+    CopyOnce ".config\komorebi\komorebi.bar.json" "$env:USERPROFILE\komorebi.bar.json"
     Link ".config\komorebi\applications.json"   "$env:USERPROFILE\applications.json"
 }
 if ($tools['whkd']) {

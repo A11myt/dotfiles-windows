@@ -43,7 +43,7 @@ LOCALAPPDATA = Path(os.environ.get("LOCALAPPDATA", Path.home() / ".local/share")
 CONFIG = APPDATA / "wintheme" / "config.json"
 HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 OHMYPOSH = HOME / ".config/ohmyposh/theme.omp.json"          # vom PowerShell-Profil geladen
-KOMOREBI_LAST = APPDATA / "wintheme" / "komorebi.json"     # zuletzt gesetzte Rahmenfarben (für Rückgängig)
+KOMOREBI_FILES = [HOME / "komorebi.json", HOME / "komorebi.bar.json"]   # Theme „Custom“ wird hier eingetragen
 PARTS = "windows,terminal,vscode,ohmyposh,komorebi"
 HISTORY = APPDATA / "wintheme" / "history"          # Stände vor jedem Einfärben (max. KEEP)
 ORIGINAL = APPDATA / "wintheme" / "original.json"   # Stand vor der allerersten Benutzung (nie überschrieben)
@@ -372,7 +372,7 @@ def apply_ohmyposh(pal: dict, dry: bool) -> str:
     return "oh-my-posh: Theme erzeugt (neue PowerShell-Fenster)" + (" (nur Vorschau)" if dry else "")
 
 
-# ── komorebi (Fensterrahmen, live) ───────────────────────────────────────────
+# ── komorebi (Fensterrahmen + Leiste: Theme „Custom“ mit Base16-Palette) ───
 KOMOREBI_ERR = ""      # letzte Fehlermeldung von komorebic (fürs Protokoll)
 
 
@@ -391,30 +391,42 @@ def komorebic(*args: str) -> bool:
     return r.returncode == 0
 
 
-def set_borders(kinds: dict) -> bool:
-    ok = True
-    for kind, color in kinds.items():
-        r, g, b = rgb(color)
-        ok &= komorebic("border-colour", "--window-kind", kind, str(r), str(g), str(b))
-    return ok
+def base16(c: dict, dark: bool) -> dict:
+    """Base16-Palette aus den Material-Farben (00–07 Flächen/Text, 08–0F Akzente)."""
+    return {
+        "base_00": c["surface"], "base_01": c["surface_container_low"], "base_02": c["surface_container_high"],
+        "base_03": c["outline_variant"], "base_04": c["outline"], "base_05": c["on_surface"],
+        "base_06": c["on_surface_variant"], "base_07": c["inverse_surface"] if dark else c["on_surface"],
+        "base_08": c["error"], "base_09": c["tertiary"], "base_0a": c["secondary"], "base_0b": c["primary_fixed_dim"],
+        "base_0c": c["tertiary_fixed_dim"], "base_0d": c["primary"], "base_0e": c["secondary_fixed_dim"], "base_0f": c["outline"],
+    }
 
 
-def apply_komorebi(pal: dict, dry: bool) -> str:
-    c = pal["colors"]
-    kinds = {"single": c["primary"], "stack": c["secondary"], "monocle": c["tertiary"], "unfocused": c["outline_variant"]}
+def apply_komorebi(pal: dict, dry: bool) -> str | None:
     import shutil
-    if not shutil.which("komorebic"):
+    files = [f for f in KOMOREBI_FILES if f.is_file()]
+    if not shutil.which("komorebic") or not files:
         return None
+    colours = base16(pal["colors"], pal["dark"])
+    themes = {
+        "komorebi.json": {"palette": "Custom", "colours": colours, "single_border": "Base0D", "stack_border": "Base0E",
+                          "monocle_border": "Base09", "floating_border": "Base0C", "unfocused_border": "Base02",
+                          "unfocused_locked_border": "Base08", "bar_accent": "Base0D"},
+        "komorebi.bar.json": {"palette": "Custom", "colours": colours, "accent": "Base0D"},
+    }
+    for f in files:
+        data = json.loads(strip_jsonc(f.read_text(encoding="utf-8-sig")))
+        data["theme"] = themes[f.name]
+        if not dry:
+            write_file(f, json.dumps(data, indent=2, ensure_ascii=False))
     if dry:
-        return f"komorebi: Rahmen {c['primary']} (nur Vorschau)"
+        return f"komorebi: Theme {pal['colors']['primary']} (nur Vorschau)"
     if not komorebic("state"):
-        return "komorebi: läuft gerade nicht – Rahmenfarben beim nächsten Einfärben"
-    if not set_borders(kinds):
+        return "komorebi: Theme gespeichert – gilt beim nächsten Start von komorebi"
+    if not komorebic("reload-configuration"):
         log_raw(KOMOREBI_ERR + "\n")
-        return "komorebi: Fehler beim Setzen der Rahmenfarben – Details in wintheme.log"
-    KOMOREBI_LAST.parent.mkdir(parents=True, exist_ok=True)
-    KOMOREBI_LAST.write_text(json.dumps(kinds), encoding="utf-8")
-    return f"komorebi: Rahmen {c['primary']}"
+        return "komorebi: Theme gespeichert, Neuladen fehlgeschlagen – Details in wintheme.log"
+    return f"komorebi: Theme {pal['colors']['primary']} (Rahmen und Leiste)"
 
 
 # ── Sicherung / Rückgängig ───────────────────────────────────────────────────
@@ -437,9 +449,9 @@ def snapshot(label: str) -> dict:
                 snap["registry"].append({"path": path, "name": name, "kind": kind, "value": value})
         wp = reg_get(DESKTOP, "WallPaper")
         snap["wallpaper"] = wp[0] if wp else None
-    for f in terminal_settings() + vscode_settings() + ([OHMYPOSH] if OHMYPOSH.is_file() else []):
+    extra = [f for f in [OHMYPOSH, *KOMOREBI_FILES] if f.is_file()]
+    for f in terminal_settings() + vscode_settings() + extra:
         snap["files"][str(f)] = f.read_text(encoding="utf-8-sig")
-    snap["komorebi"] = json.loads(KOMOREBI_LAST.read_text(encoding="utf-8")) if KOMOREBI_LAST.is_file() else None
     return snap
 
 
@@ -467,13 +479,9 @@ def restore(snap: dict) -> None:
     for path, text in snap["files"].items():
         if Path(path).parent.is_dir():
             write_file(Path(path), text)
-    # komorebi: frühere Rahmenfarben wieder setzen – gab es keine, Konfiguration neu laden (eigenes Theme)
-    if snap.get("komorebi"):
-        set_borders(snap["komorebi"])
-        KOMOREBI_LAST.write_text(json.dumps(snap["komorebi"]), encoding="utf-8")
-    elif "komorebi" in snap:
+    # komorebi: wiederhergestellte Config neu laden (falls es läuft)
+    if any(Path(p).name.startswith("komorebi") for p in snap["files"]) and komorebic("state"):
         komorebic("reload-configuration")
-        KOMOREBI_LAST.unlink(missing_ok=True)
 
 
 def undo() -> int:

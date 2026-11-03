@@ -10,7 +10,7 @@
   "border_offset": -1,
   "theme": {
     "palette": "Base16",
-    "name": "Gruvbox-Dark-Medium",
+    "name": "GruvboxDarkMedium",
     "unfocused_border": "Base03",
     "bar_accent": "Base09"
   },
