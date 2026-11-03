@@ -358,7 +358,9 @@ def apply_terminal(pal: dict, dry: bool) -> str:
         defaults["colorScheme"] = "Matugen"
         if pal.get("look"):
             look = dict(LOOK_TERMINAL)
-            if not font_installed(LOOK_FONT):
+            font = pal.get("font") or LOOK_FONT
+            look["font"] = {**look["font"], "face": font}
+            if not font_installed(font):
                 look.pop("font")
             defaults.update(look)
             data["themes"] = [t for t in data.get("themes", []) if t.get("name") != "Matugen"] + [
@@ -373,7 +375,8 @@ def apply_terminal(pal: dict, dry: bool) -> str:
         write_file(f, json.dumps(data, indent=4, ensure_ascii=False))   # Terminal lädt Änderungen sofort
     extra = ""
     if pal.get("look"):
-        extra = ", Aussehen wie Alacritty" + ("" if font_installed(LOOK_FONT) else f" (Schrift „{LOOK_FONT}“ fehlt: scoop bucket add nerd-fonts; scoop install Iosevka-NF)")
+        font = pal.get("font") or LOOK_FONT
+        extra = f", Aussehen wie Alacritty, Schrift „{font}“" + ("" if font_installed(font) else " fehlt – im Theme Studio unter Nerd Fonts installieren oder: scoop bucket add nerd-fonts; scoop install Iosevka-NF")
     return f"Windows Terminal: Schema „Matugen“{extra} ({len(files)} Datei{'en' if len(files) > 1 else ''})" + (" (nur Vorschau)" if dry else "")
 
 
@@ -582,6 +585,7 @@ def history() -> int:
 def run(image: Path, cfg: dict, set_wall: bool, only: set[str], dry: bool) -> None:
     pal = palette(image, cfg)
     pal["look"] = cfg.get("look", True)
+    pal["font"] = cfg.get("font")
     if not dry:
         remember(f"{image.name} · {cfg['scheme']} · {cfg['mode']}")
     print(f"{image.name}: Ausgangsfarbe {pal['source']} · {cfg['scheme']} · {'dunkel' if pal['dark'] else 'hell'}")
@@ -630,6 +634,7 @@ def main() -> int:
     ap.add_argument("--contrast", type=float, help="-1 … 1")
     ap.add_argument("--titlebars", choices=["on", "off"], help="Akzentfarbe in Titelleisten")
     ap.add_argument("--look", choices=["on", "off"], help="Aussehen wie Linux (Terminal-Schrift/Abstand, Lücken, Rahmen)")
+    ap.add_argument("--font", help='Terminal-Schrift, z. B. "Iosevka Nerd Font Mono" (leer "" = Standard)')
     ap.add_argument("--only", default=PARTS)
     ap.add_argument("--sources", action="store_true")
     ap.add_argument("--watch", action="store_true")
@@ -654,6 +659,8 @@ def main() -> int:
         cfg["titlebars"] = a.titlebars == "on"; changed = True
     if a.look:
         cfg["look"] = a.look == "on"; changed = True
+    if a.font is not None:
+        cfg["font"] = a.font.strip() or None; changed = True
     only = {x.strip() for x in a.only.split(",") if x.strip()}
 
     if a.watch:
