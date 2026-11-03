@@ -54,11 +54,13 @@ Was nicht installiert ist, lässt wintheme aus.
 
 ### Leiste anpassen – `winbar`
 
+`install.ps1` richtet komorebi so ein, dass es mit Leiste (und whkd, falls installiert) bei der Anmeldung startet, und startet es gleich.
+
 Die komorebi-Leiste sieht aus wie auf dem Laptop (40 px, Arbeitsflächen mit Nummer + Icon, Fenstertitel in der Mitte, rechts Medien/CPU/RAM/Netz/Akku/Tray/Datum/Uhr). Änderungen wirken sofort:
 
 ```powershell
 winbar                          # was ist wo
-winbar reset                    # Laptop-Vorlage (einmal nach dem Update ausführen)
+winbar reset                    # zurück zur Laptop-Vorlage (install.ps1 setzt sie beim ersten Mal selbst)
 winbar add storage              # Widget einblenden (rechts) …
 winbar add tray left            # … oder auf eine Seite: left | center | right
 winbar remove cpu               # ausblenden

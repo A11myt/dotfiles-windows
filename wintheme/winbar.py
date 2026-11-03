@@ -9,6 +9,7 @@
                                  · round 10 (Ecken) · spacing 10 · groups on|off
   winbar workspaces <art>        icons | text | both (Nummer + Icon, wie Laptop)
   winbar reset                   Laptop-Vorlage aus dem Repo (Farben bleiben)
+  winbar init                    wie reset, aber nur beim allerersten Mal (für install.ps1)
   winbar taskbar hide|show       Windows-Taskleiste automatisch ausblenden / wieder zeigen
 
 Widgets: workspaces, layout, window, media, cpu, memory, network, battery, storage,
@@ -24,6 +25,7 @@ HERE = Path(__file__).resolve().parent
 HOME = Path(os.environ.get("USERPROFILE", Path.home()))
 BAR = HOME / "komorebi.bar.json"
 PRESET = HERE / "komorebi.bar.json"           # von install.ps1 neben winbar.py gelegt
+APPLIED = Path(os.environ.get("APPDATA", Path.home() / ".config")) / "wintheme" / "winbar-preset-applied"
 SIDES = {"left": "left_widgets", "center": "center_widgets", "right": "right_widgets",
          "links": "left_widgets", "mitte": "center_widgets", "rechts": "right_widgets"}
 SIDE_NAME = {"left_widgets": "links", "center_widgets": "Mitte", "right_widgets": "rechts"}
@@ -171,6 +173,11 @@ def main(argv: list[str]) -> int:
     if cmd == "taskbar" and args and args[0] in ("hide", "show"):
         taskbar(args[0] == "hide")
         return 0
+    if cmd == "init":
+        if APPLIED.exists():
+            print("Leiste: deine Einstellungen bleiben (Vorlage wurde schon einmal gesetzt)")
+            return 0
+        cmd = "reset"
     if cmd == "reset":
         if not PRESET.is_file():
             die(f"Vorlage {PRESET} fehlt – install.ps1 erneut ausführen")
@@ -178,6 +185,8 @@ def main(argv: list[str]) -> int:
         if BAR.is_file():
             preset["theme"] = load().get("theme", preset.get("theme"))   # Wallpaper-Farben behalten
         save(preset)
+        APPLIED.parent.mkdir(parents=True, exist_ok=True)
+        APPLIED.write_text("1")
         print("Leiste auf Laptop-Vorlage gesetzt")
         show(preset)
         return 0

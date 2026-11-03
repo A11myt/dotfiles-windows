@@ -254,8 +254,27 @@ if ($NoWatch) {
     Start-Process -FilePath $vpyw -ArgumentList "`"$script`" --watch" -WindowStyle Hidden
 }
 
+# Leiste: Laptop-Vorlage beim ersten Mal (später bleiben deine winbar-Änderungen)
+if ($tools['komorebi']) { & $vpy (Join-Path $Dest 'winbar.py') init }
+
 Write-Host "`nEinmal mit dem aktuellen Wallpaper einfärben …"
 & $vpy $script
+
+# komorebi mit Leiste (+ whkd) bei der Anmeldung starten und jetzt gleich laufen lassen
+if ($tools['komorebi']) {
+    $kArgs = @('--bar')
+    if ($tools['whkd']) { $kArgs += '--whkd' }
+    komorebic enable-autostart @kArgs *> $null
+    if ($LASTEXITCODE -eq 0) { Write-Host "Autostart: komorebi $($kArgs -join ' ')" }
+    komorebic state *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host 'komorebi starten …'
+        komorebic start @kArgs
+    } else {
+        if (-not (Get-Process komorebi-bar -ErrorAction SilentlyContinue)) { Start-Process komorebi-bar -WindowStyle Hidden }
+        if ($tools['whkd'] -and -not (Get-Process whkd -ErrorAction SilentlyContinue)) { Start-Process whkd -WindowStyle Hidden }
+    }
+}
 if ($skipped.Count) {
     Write-Host "`nÜbersprungen (nicht installiert): $($skipped -join ', ')"
     Write-Host 'Später nachinstalliert? Einfach install.ps1 erneut ausführen.'
