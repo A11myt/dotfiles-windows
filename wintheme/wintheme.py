@@ -442,12 +442,15 @@ def apply_vscode(pal: dict, dry: bool) -> str:
 # ── oh-my-posh ───────────────────────────────────────────────────────────────
 def apply_ohmyposh(pal: dict, dry: bool) -> str:
     import shutil
-    tpl = HERE / "templates/ohmyposh.json"
+    # Prompt aus Theme Studio hat Vorrang (fehlt die Datei → mitgelieferte Vorlage)
+    studio = APPDATA / "wintheme" / "ohmyposh.studio.json"
+    tpl = studio if studio.is_file() else HERE / "templates/ohmyposh.json"
     if not tpl.is_file() or not shutil.which("oh-my-posh"):
         return None
     if not dry:
         write_file(OHMYPOSH, render(tpl.read_text(encoding="utf-8"), pal["colors"]))
-    return "oh-my-posh: Theme erzeugt (neue PowerShell-Fenster)" + (" (nur Vorschau)" if dry else "")
+    return ("oh-my-posh: Theme erzeugt" + (" (Prompt aus Theme Studio)" if tpl == studio else "") +
+            " (neue PowerShell-Fenster)" + (" (nur Vorschau)" if dry else ""))
 
 
 # ── komorebi (Fensterrahmen + Leiste: Theme „Custom“ mit Base16-Palette) ───
