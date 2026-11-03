@@ -89,7 +89,12 @@ if ($tools['komorebi']) {
 if ($tools['whkd']) {
     Link ".config\whkd\whkdrc"                 "$env:USERPROFILE\.config\whkdrc"
 }
-Link ".config\powershell\Microsoft.PowerShell_profile.ps1" $PROFILE   # prüft selbst, ob oh-my-posh da ist
+# Profil für BEIDE PowerShells: Windows PowerShell 5.1 und PowerShell 7 haben getrennte Profile
+# (install.ps1 läuft meist unter 5.1, im Terminal oft 7) – prüft selbst, ob oh-my-posh da ist
+$docs = [Environment]::GetFolderPath('MyDocuments')
+foreach ($dir in 'WindowsPowerShell', 'PowerShell') {
+    Link ".config\powershell\Microsoft.PowerShell_profile.ps1" (Join-Path $docs "$dir\Microsoft.PowerShell_profile.ps1")
+}
 if ($tools['VS Code']) {
     Link     ".config\vscode\keybindings.json"  "$env:APPDATA\Code\User\keybindings.json"
     CopyOnce ".config\vscode\settings.json"     "$env:APPDATA\Code\User\settings.json"
