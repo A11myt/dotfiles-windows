@@ -1,0 +1,132 @@
+[
+    {
+        "name": {
+            "de": "Spiele, Spielzeug, Spielkonsolen \u0026 Freizeitger\u00E4te",
+            "en": "not available"
+        },
+        "subCategories": [
+            {
+                "name": {
+                    "de": "Spiele, Spielzeug - Sonstige",
+                    "en": "not available"
+                },
+                "items": [
+                    {
+                        "id": "acdf4215-0bef-415c-afa5-b33ebe25b92e",
+                        "displayKey": "MJEUX030000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,201 - 0,5 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9504",
+                            "en": "Video game consoles and machines, articles for funfair, table or parlour games, incl. pintables, billiards, special tables for casino games and automatic bowling alley equipment ",
+                            "de": "Videospielkonsolen oder -ger\u00E4te, Gesellschaftsspiele, einschl. mechanisch betriebene Spiele, Billardspiele, Gl\u00FCcksspieltische und automatische Kegelbahnen \u0060z. B. Bowlingbahnen\u0060"
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    },
+                    {
+                        "id": "acdf4215-0bef-415c-afa5-b33ebe25b92e",
+                        "displayKey": "MJEUX030000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,201 - 0,5 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9505",
+                            "en": "Festival, carnival or other entertainment articles, incl. conjuring tricks and novelty jokes, n.e.s.",
+                            "de": "Festartikel, Karnevalsartikel [Faschingsartikel] oder andere Unterhaltungsartikel, einschl. Zauberartikel und Scherzartikel, a.n.g."
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    },
+                    {
+                        "id": "acdf4215-0bef-415c-afa5-b33ebe25b92e",
+                        "displayKey": "MJEUX030000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,201 - 0,5 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9506",
+                            "en": "Articles and equipment for general physical exercise, gymnastics, athletics, other sports, incl. table-tennis, or outdoor games, not specified or included in this chapter or elsewhere, swimming pools and paddling pools.",
+                            "de": "Ger\u00E4te und Ausr\u00FCstungsgegenst\u00E4nde f\u00FCr die allgemeine k\u00F6rperliche Ert\u00FCchtigung, Gymnastik, Leicht- und Schwerathletik, andere Sportarten \u0060einschl. Tischtennis\u0060 oder Freiluftspiele, in diesem Kapitel oder an anderer Stelle weder genannt noch inbegriffen, Schwimmbecken und Planschbecken"
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    },
+                    {
+                        "id": "0e706b62-525d-48b3-bba0-b48e2cfe5f3a",
+                        "displayKey": "MJEUX040000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,501 - 1 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9504",
+                            "en": "Video game consoles and machines, articles for funfair, table or parlour games, incl. pintables, billiards, special tables for casino games and automatic bowling alley equipment ",
+                            "de": "Videospielkonsolen oder -ger\u00E4te, Gesellschaftsspiele, einschl. mechanisch betriebene Spiele, Billardspiele, Gl\u00FCcksspieltische und automatische Kegelbahnen \u0060z. B. Bowlingbahnen\u0060"
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    },
+                    {
+                        "id": "0e706b62-525d-48b3-bba0-b48e2cfe5f3a",
+                        "displayKey": "MJEUX040000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,501 - 1 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9505",
+                            "en": "Festival, carnival or other entertainment articles, incl. conjuring tricks and novelty jokes, n.e.s.",
+                            "de": "Festartikel, Karnevalsartikel [Faschingsartikel] oder andere Unterhaltungsartikel, einschl. Zauberartikel und Scherzartikel, a.n.g."
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    },
+                    {
+                        "id": "0e706b62-525d-48b3-bba0-b48e2cfe5f3a",
+                        "displayKey": "MJEUX040000",
+                        "name": {
+                            "de": "Sonstige Spiele / Spielzeug (gem\u00E4\u00DF der Spielzeugrichtlinie 2009/48/EG) | 0,501 - 1 kg",
+                            "en": "not available"
+                        },
+                        "nullset": 1,
+                        "gtin": "",
+                        "tariff": {
+                            "code": "9506",
+                            "en": "Articles and equipment for general physical exercise, gymnastics, athletics, other sports, incl. table-tennis, or outdoor games, not specified or included in this chapter or elsewhere, swimming pools and paddling pools.",
+                            "de": "Ger\u00E4te und Ausr\u00FCstungsgegenst\u00E4nde f\u00FCr die allgemeine k\u00F6rperliche Ert\u00FCchtigung, Gymnastik, Leicht- und Schwerathletik, andere Sportarten \u0060einschl. Tischtennis\u0060 oder Freiluftspiele, in diesem Kapitel oder an anderer Stelle weder genannt noch inbegriffen, Schwimmbecken und Planschbecken"
+                        },
+                        "quantities": [
+                            null,
+                            null
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
