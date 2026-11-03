@@ -1,0 +1,91 @@
+﻿
+== System ==
+Zeit:       2026-11-03 10:28:34
+PowerShell: 5.1.26100.9711 (Desktop)
+Windows:    Microsoft Windows NT 10.0.26200.0
+Repo:       C:\Workspace\github\dotfiles-windows  (git e1b5790 asdf)
+
+== Werkzeuge ==
+komorebic   Application: %USERPROFILE%\scoop\shims\komorebic.exe
+komorebi    Application: %USERPROFILE%\scoop\shims\komorebi.exe
+whkd        fehlt
+code        Application: C:\Program Files\Microsoft VS Code\bin\code.cmd
+oh-my-posh  Application: %USERPROFILE%\scoop\shims\oh-my-posh.exe
+wt          Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\wt.exe
+pwsh        Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe
+py          Application: %USERPROFILE%\scoop\apps\python\current\py.exe
+python      Application: %USERPROFILE%\scoop\apps\python\current\python.exe
+git         Application: C:\Program Files\Git\cmd\git.exe
+winget      Application: %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\winget.exe
+wintheme    fehlt
+Terminal    ja
+
+== wintheme-Installation ==
+venv python:  NEIN
+wintheme.py:  NEIN
+Befehl (bin): NEIN
+alter Befehl: NEIN
+Autostart:    NEIN
+Rechtsklick:  NEIN
+--watch läuft: NEIN
+
+== PATH (nur wintheme) ==
+Benutzer-PATH: 
+dieses Fenster: 
+
+== PowerShell-Profile ==
+WindowsPowerShell: vorhanden, LinkType=HardLink, wintheme-Funktion=ja
+PowerShell: vorhanden, LinkType=HardLink, wintheme-Funktion=ja
+aktuelles $PROFILE: %USERPROFILE%\OneDrive - e-systems\Dokumente\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+
+== Einstellungen (config.json) ==
+keine
+gespeicherte Stände: 0, Original: NEIN
+
+== Probelauf (wintheme --dry-run) ==
+übersprungen – wintheme nicht installiert
+
+== wintheme.log (Ende) ==
+keins
+
+== install.log (Ende) ==
+**********************
+nStart der Windows PowerShell-Aufzeichnung
+Startzeit: 20261103102531
+Benutzername: AzureAD\<user>
+RunAs-Benutzer: AzureAD\<user>
+Konfigurationsname: 
+Computer: <pc> (Microsoft Windows NT 10.0.26200.0)
+Hostanwendung: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File .\install.ps1
+Prozess-ID: 25724
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+LINK:  %USERPROFILE%\komorebi.json
+LINK:  %USERPROFILE%\komorebi.bar.json
+LINK:  %USERPROFILE%\applications.json
+LINK:  %USERPROFILE%\OneDrive - e-systems\Dokumente\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+LINK:  %USERPROFILE%\OneDrive - e-systems\Dokumente\PowerShell\Microsoft.PowerShell_profile.ps1
+LINK:  %USERPROFILE%\AppData\Roaming\Code\User\keybindings.json
+BLEIBT: %USERPROFILE%\AppData\Roaming\Code\User\settings.json (eigene Datei)
+BLEIBT: %USERPROFILE%\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json (eigene Datei)
+
+VS-Code-Erweiterungen …
+
+PS>TerminatingError(py.exe): "Der ausgeführte Befehl wurde beendet, da die Einstellungsvariable "ErrorActionPreference" oder ein allgemeiner Parameter auf "Stop" festgelegt ist: No installed Python found!."
+>> TerminatingError(py.exe): "Der ausgeführte Befehl wurde beendet, da die Einstellungsvariable "ErrorActionPreference" oder ein allgemeiner Parameter auf "Stop" festgelegt ist: No installed Python found!."
+FEHLER: No installed Python found!
+  bei: In C:\Workspace\github\dotfiles-windows\install.ps1:137 Zeichen:15
++ ...       $ok = & $exe.Source @pyArgs -c 'import sys; print(sys.version_i ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Für Hilfe: powershell -ExecutionPolicy Bypass -File .\diagnose.ps1
+**********************
+Ende der Windows PowerShell-Aufzeichnung
+Endzeit: 20261103102535
+**********************
