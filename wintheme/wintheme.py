@@ -48,6 +48,7 @@ PARTS = "windows,terminal,vscode,ohmyposh,komorebi"
 HISTORY = APPDATA / "wintheme" / "history"          # Stände vor jedem Einfärben (max. KEEP)
 ORIGINAL = APPDATA / "wintheme" / "original.json"   # Stand vor der allerersten Benutzung (nie überschrieben)
 KEEP = 20
+LOGFILE = APPDATA / "wintheme" / "wintheme.log"       # für diagnose.ps1 (wird bei 200 KB gekürzt)
 DEFAULTS = {"mode": "dark", "scheme": "tonal-spot", "contrast": 0.0, "pick": {}, "titlebars": False}
 
 SCHEMES = {
@@ -59,6 +60,37 @@ SCHEMES = {
 }
 # Windows-Akzentpalette: 8 Stufen (hell3 … Akzent … dunkel3, letzte unbenutzt) als Tonwerte
 ACCENT_TONES = [90, 77, 62, 50, 42, 28, 14, 60]
+
+
+# ── Protokoll ────────────────────────────────────────────────────────────────
+class Tee:
+    """Ausgaben zusätzlich ins Protokoll schreiben (auch unter pythonw ohne Konsole)."""
+    def __init__(self, stream):
+        self.stream = stream
+    def write(self, text):
+        log_raw(text)
+        if self.stream:
+            try:
+                self.stream.write(text)
+            except Exception:
+                pass
+    def flush(self):
+        if self.stream:
+            try:
+                self.stream.flush()
+            except Exception:
+                pass
+
+
+def log_raw(text: str) -> None:
+    try:
+        LOGFILE.parent.mkdir(parents=True, exist_ok=True)
+        if LOGFILE.exists() and LOGFILE.stat().st_size > 200_000:
+            LOGFILE.write_text(LOGFILE.read_text(encoding="utf-8", errors="replace")[-100_000:], encoding="utf-8")
+        with LOGFILE.open("a", encoding="utf-8") as f:
+            f.write(text)
+    except Exception:
+        pass
 
 
 # ── Einstellungen ────────────────────────────────────────────────────────────
@@ -504,7 +536,9 @@ def watch(cfg_only: set[str]) -> None:
                     run(p, load_config(), False, cfg_only, False)
                 last = key
         except Exception as e:     # nie abstürzen, nächster Versuch in 5 s
+            import traceback
             print("wintheme --watch:", e, file=sys.stderr)
+            log_raw(traceback.format_exc())
         time.sleep(5)
 
 
@@ -567,4 +601,13 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.stdout, sys.stderr = Tee(sys.stdout), Tee(sys.stderr)
+    log_raw(f"\n=== {time.strftime('%Y-%m-%d %H:%M:%S')} wintheme {' '.join(sys.argv[1:])}\n")
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception:
+        import traceback
+        traceback.print_exc()          # landet über Tee auch im Protokoll
+        sys.exit(1)

@@ -14,6 +14,18 @@
 #>
 param([switch]$NoWatch, [switch]$Uninstall, [switch]$KeepColors)
 $ErrorActionPreference = 'Stop'
+
+# Protokoll für diagnose.ps1 (auch bei Abbruch durch einen Fehler)
+$logDir = Join-Path $env:LOCALAPPDATA 'wintheme-logs'
+New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+try { Start-Transcript -Path (Join-Path $logDir 'install.log') -Force | Out-Null } catch {}
+trap {
+    Write-Host "FEHLER: $_" -ForegroundColor Red
+    Write-Host "  bei: $($_.InvocationInfo.PositionMessage)"
+    Write-Host 'Für Hilfe: powershell -ExecutionPolicy Bypass -File .\diagnose.ps1'
+    try { Stop-Transcript | Out-Null } catch {}
+    break
+}
 $repo    = $PSScriptRoot
 $Dest    = Join-Path $env:LOCALAPPDATA 'wintheme'
 $Bin     = Join-Path $env:LOCALAPPDATA 'wintheme\bin'            # eigener Ordner im Benutzer-PATH
@@ -43,6 +55,7 @@ if ($Uninstall) {
     }
     Remove-Item -Recurse -Force $MenuKey -ErrorAction SilentlyContinue
     Write-Host 'wintheme entfernt (Einstellungen/Stände: %APPDATA%\wintheme). Verlinkte Configs bleiben.'
+    try { Stop-Transcript | Out-Null } catch {}
     return
 }
 
@@ -181,3 +194,4 @@ if ($skipped.Count) {
     Write-Host 'Später nachinstalliert? Einfach install.ps1 erneut ausführen.'
 }
 Write-Host "`nFertig. Neues PowerShell-Fenster öffnen (Prompt-Farben). Hilfe: wintheme --help"
+try { Stop-Transcript | Out-Null } catch {}

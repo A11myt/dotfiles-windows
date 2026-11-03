@@ -60,6 +60,16 @@ wintheme --history     # gespeicherte Stände
 kurzen Namen der früheren Farbdatei (`{{primary}}`, `{{surface_dark}}`, `{{accent_muted}}` …).
 Die VS-Code-Vorlage kommt aus den Linux-Dotfiles: `wintheme/sync-templates.sh` (erwartet `../dotfiles` daneben).
 
+## Fehlersuche
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\diagnose.ps1
+```
+
+Sammelt Werkzeuge, wintheme-Installation, PATH, Profile, Einstellungen, einen Probelauf sowie die Protokolle
+(`%APPDATA%\wintheme\wintheme.log`, `%LOCALAPPDATA%\wintheme-logs\install.log`) in `logs\diagnose-<zeit>.log`
+und lädt den Bericht hoch (commit + push; `-NoPush` nur lokal). Benutzer- und Rechnername werden geschwärzt.
+
 ## Tastenkürzel
 
 - Windows Terminal (tmux-Ersatz): [docs/keybindings-terminal.md](docs/keybindings-terminal.md)
