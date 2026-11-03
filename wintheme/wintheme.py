@@ -139,7 +139,10 @@ def snake(name: str) -> str:
 def palette(image: Path, cfg: dict) -> dict:
     sources = source_colors(image)
     pick = cfg["pick"].get(image.name)
-    src = sources[min(int(pick), len(sources) - 1)] if isinstance(pick, int) else sources[0]
+    if isinstance(pick, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", pick):     # feste Farbe (z. B. aus Theme Studio)
+        src = 0xFF000000 | int(pick[1:], 16)
+    else:
+        src = sources[min(int(pick), len(sources) - 1)] if isinstance(pick, int) else sources[0]
     dark = cfg["mode"] != "light"
     s = scheme_class(cfg["scheme"])(Hct.from_int(src), dark, float(cfg["contrast"]), spec_version="2021")
     colors = {}
@@ -623,7 +626,7 @@ def main() -> int:
     ap.add_argument("image", nargs="?", help="Bild (sonst aktuelles Wallpaper)")
     ap.add_argument("--mode", choices=["dark", "light"])
     ap.add_argument("--scheme", choices=list(SCHEMES))
-    ap.add_argument("--color", help="1–4 oder auto (Ausgangsfarbe für dieses Bild)")
+    ap.add_argument("--color", help="1–4, auto oder #rrggbb (Ausgangsfarbe für dieses Bild, z. B. aus Theme Studio)")
     ap.add_argument("--contrast", type=float, help="-1 … 1")
     ap.add_argument("--titlebars", choices=["on", "off"], help="Akzentfarbe in Titelleisten")
     ap.add_argument("--look", choices=["on", "off"], help="Aussehen wie Linux (Terminal-Schrift/Abstand, Lücken, Rahmen)")
@@ -670,8 +673,13 @@ def main() -> int:
     if a.color:
         if a.color == "auto":
             cfg["pick"].pop(image.name, None)
-        else:
+        elif re.fullmatch(r"#?[0-9a-fA-F]{6}", a.color):
+            cfg["pick"][image.name] = "#" + a.color.lstrip("#").lower()
+        elif a.color.isdigit():
             cfg["pick"][image.name] = max(1, min(4, int(a.color))) - 1
+        else:
+            print("--color: 1–4, auto oder eine Farbe wie #db79a9", file=sys.stderr)
+            return 2
         changed = True
     if changed and not a.dry_run:
         save_config(cfg)
