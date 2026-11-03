@@ -3,6 +3,13 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     oh-my-posh init pwsh --config "$env:USERPROFILE\.config\ohmyposh\theme.omp.json" | Invoke-Expression
 }
 
+# ── wintheme (Farben aus dem Wallpaper) ───────────────────────────────────────
+# funktioniert auch, wenn der PATH-Eintrag (noch) fehlt
+$wintheme = "$env:LOCALAPPDATA\wintheme"
+if (Test-Path "$wintheme\venv\Scripts\python.exe") {
+    function wintheme { & "$wintheme\venv\Scripts\python.exe" "$wintheme\wintheme.py" @args }
+}
+
 # ── PSReadLine ────────────────────────────────────────────────────────────────
 Set-PSReadLineOption -EditMode Windows
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin

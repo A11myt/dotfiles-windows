@@ -16,7 +16,9 @@ param([switch]$NoWatch, [switch]$Uninstall, [switch]$KeepColors)
 $ErrorActionPreference = 'Stop'
 $repo    = $PSScriptRoot
 $Dest    = Join-Path $env:LOCALAPPDATA 'wintheme'
-$Shim    = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\wintheme.cmd'   # liegt im PATH
+$Bin     = Join-Path $env:LOCALAPPDATA 'wintheme\bin'            # eigener Ordner im Benutzer-PATH
+$Shim    = Join-Path $Bin 'wintheme.cmd'
+$OldShim = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\wintheme.cmd'   # frühere Versionen
 $MenuKey = 'HKCU:\Software\Classes\SystemFileAssociations\image\shell\wintheme'
 $Startup = Join-Path ([Environment]::GetFolderPath('Startup')) 'wintheme-watch.lnk'
 $vpy     = Join-Path $Dest 'venv\Scripts\python.exe'
@@ -33,7 +35,12 @@ if ($Uninstall) {
         Write-Host 'Stelle den Zustand vor der ersten Benutzung wieder her …'
         & $vpy (Join-Path $Dest 'wintheme.py') --original
     }
-    Remove-Item -Recurse -Force $Dest, $Shim, $Startup -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force $Dest, $OldShim, $Startup -ErrorAction SilentlyContinue
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if ($userPath) {
+        $rest = ($userPath -split ';' | Where-Object { $_ -and $_ -ne $Bin }) -join ';'
+        [Environment]::SetEnvironmentVariable('Path', $rest, 'User')
+    }
     Remove-Item -Recurse -Force $MenuKey -ErrorAction SilentlyContinue
     Write-Host 'wintheme entfernt (Einstellungen/Stände: %APPDATA%\wintheme). Verlinkte Configs bleiben.'
     return
@@ -134,7 +141,15 @@ if (-not (Test-Path $vpy)) {
 & $vpy -m pip install --quiet 'materialyoucolor==3.0.4' 'pillow>=10'
 $script = Join-Path $Dest 'wintheme.py'
 
-Set-Content -Encoding ASCII -Path $Shim -Value "@`"$vpy`" `"$script`" %*"     # Befehl „wintheme“
+# Befehl „wintheme“: eigener Ordner, dauerhaft im Benutzer-PATH (+ sofort in diesem Fenster)
+New-Item -ItemType Directory -Force -Path $Bin | Out-Null
+Set-Content -Encoding ASCII -Path $Shim -Value "@`"$vpy`" `"$script`" %*"
+Remove-Item -Force $OldShim -ErrorAction SilentlyContinue
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+if (-not (($userPath -split ';') -contains $Bin)) {
+    [Environment]::SetEnvironmentVariable('Path', (@($userPath, $Bin) | Where-Object { $_ }) -join ';', 'User')
+}
+if (-not (($env:Path -split ';') -contains $Bin)) { $env:Path = "$env:Path;$Bin" }
 
 New-Item -Force -Path $MenuKey | Out-Null                                  # Rechtsklick auf Bilder
 Set-ItemProperty -Path $MenuKey -Name '(default)' -Value 'Als Hintergrund mit Farben (wintheme)'
